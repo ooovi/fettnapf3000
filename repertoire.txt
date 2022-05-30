@@ -1,0 +1,48 @@
+### Main courses
+10 bratlinge
+10 kichererbsencurry
+10 leeksoup
+10 mushroomquiche
+10 savoy+cheesymash
+10 ful
+10 krautsalat
+10 mercimek
+10 pampuschky
+10 brokkolisahne
+10 gadogado
+10 pumpkinsnails
+10 weißbrot
+10 bollo
+10 chili
+10 gulash
+10 lasagne
+10 miso-pumpkin
+10 salat
+10 supershake
+10 borschtch
+10 kartoffelsalat
+10 leekquiche
+10 mushroomcream
+10 sauerkraut
+10 sweetpuschky
+
+### Breakfast
+10 frühstück
+10 britfast
+10 coffee
+10 landleberwurstpastete
+10 soblukeka
+10 tofuscramble
+10 tomatenbutter
+10 schokospaß
+10 apfelzwiebelschmelz
+
+### Sweets
+10 sweetpuschky
+10 pumpkinsnails
+10 apfelkrapfen
+10 apfelkuchen
+10 zimtschnecken
+
+### Misc
+10 misc
