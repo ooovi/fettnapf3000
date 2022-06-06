@@ -1,6 +1,6 @@
 # fettnapf3000
 
-A tool for planning almost-arbitrary-scale cooking activities. Can generate a menu, shopping list and cookbook given the recipes and desired number of servings.
+A tool for planning almost-arbitrary-scale cooking activities. Can generate a menu, shopping list and cookbook given the recipes and desired number of servings. Content is inspired by the amazing [fettnapf cookbook](https://food4action.noblogs.org/fettnapf/).
 
 ### Requirements
 - [python](https://www.python.org/) >= 3.6
