@@ -4,12 +4,13 @@
 ### Zutaten
 0.5 mehl
 0.375 margerine
-0.75 sojajoghurt
-0.075 stärke
+0.3 naturtofu
+0.45 sojajoghurt
+0.05 stärke
 1.0 champis
 0.5 räuchertofu
 0.3 zwiebeln
-0.07 knobi
+0.04 knobi
 0.1 zucker
 0.1 weißwein
 0.02 salz
