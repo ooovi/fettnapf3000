@@ -113,9 +113,12 @@ def shopping_list(total_ingredients: Counter):
 
     # print one category
     def cat_markdown(cat: str):
-        md = f"\n### {cat.capitalize()}\n\n"
+        md = ""
+        cat_amount = 0
         for (ingredient, amount) in cat_dict[cat]:
-            md += f"- {amount:g} {ingredient.capitalize()}\n"
+            md += f"- {round(amount,3):g} {ingredient.capitalize()}\n"
+            cat_amount += amount
+        md = f"\n### {cat.capitalize()} ({round(cat_amount,3):g} total)\n\n" + md
         return md
 
     # print all categories

@@ -6,7 +6,7 @@
 0.6 zwiebeln
 0.07 knobi
 1.5 rote beete (gekocht)
-0.4 kidneybohnen (trocken, nass x 4)
+0.4 weiße bohnen (trocken, nass x 4)
 0.4 dosentomaten (gehackt)
 0.3 zitronen
 0.2 cashewnüsse

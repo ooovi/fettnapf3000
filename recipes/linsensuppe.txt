@@ -8,13 +8,13 @@
 0.5 lauch
 0.3 sellerie
 0.3 räuchertofu
-0.5 braune linsen
+0.5 braune linsen (tellerlinsen)
 0.2 senf
 0.2 apfelessig
 0.15 öl
 0.5 brot
 0.01 kümmel
-0.05 petersilie (frisch)
+0.05 frische petersilie
 0.01 lorbeer
 0.01 thymian
 0.02 zucker

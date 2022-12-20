@@ -13,3 +13,4 @@
 1 spülhandschuhe
 1 müllbeutel
 1 crewcare
+0.0367 gas
