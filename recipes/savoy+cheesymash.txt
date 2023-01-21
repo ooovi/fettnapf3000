@@ -10,10 +10,10 @@
 0.2 räuchertofu
 0.025 knobi
 0.01 zucker
-2.5 kartoffeln
-0.25 margerine
-0.25 genuss-block
-0.25 sojamilch
+3.0 kartoffeln
+0.3 margerine
+0.3 genuss-block
+0.3 sojamilch
 0.15 öl
 0.001 muskat
 0.01 kreuzkümmel
