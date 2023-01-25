@@ -4,10 +4,9 @@
 
 ### Zutaten
 
-2 tofu
-1 räuchertofu
-0.5 tomaten
-0.3 zwiebeln
+1.34 tofu
+0.25 tomaten
+0.17 zwiebeln
 0.01 sojamilch
 0.005 hefeflocken
 0.04 kurkuma
@@ -15,5 +14,5 @@
 0.04 kala namak (eiersalz)
 0.01 pfeffer
 0.02 salz
-0.1 öl
 0.1 frischer schnittlauch
+0.1 margerine
