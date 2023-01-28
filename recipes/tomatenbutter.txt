@@ -4,10 +4,10 @@
 ### Zutaten
 
 0.3 margerine
-0.125 tomatenmark
+0.3 tomatenmark
 0.015 knobi
 0.07 zwiebeln
-0.1 frische petersilie
+0.01 frische petersilie
 0.02 salz
 0.01 pfeffer
 
