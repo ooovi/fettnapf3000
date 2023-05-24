@@ -1,1 +1,18 @@
-<h1>Hello</h1>
+<html>
+<head>
+<body>
+   <select id = "dropdown" onchange = "select()">
+      <option>bollo</option>
+   </select>
+   <br><br>
+   <script>
+      let output = <div>uh</div>;
+      function select() {
+         let dropdown = document.getElementById('dropdown');
+         let index = dropdown.index;
+         let value = dropdown.options[index].text;
+         output.innerHTML = value;
+      }
+   </script>
+</body>
+</html>
