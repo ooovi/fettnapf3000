@@ -130,7 +130,7 @@ entries = [
     {"english": "sunflower seeds"              , "category": "staples"   , "ingredient" : "sonnenblumenkerne"               },
     {"english": "kidney beans (dry, wet x 4)"  , "category": "staples"   , "ingredient" : "kidneybohnen (trocken, nass x 4)"},
     {"english": "white beans (dry, wet x 4)"   , "category": "staples"   , "ingredient" : "weiße bohnen (trocken, nass x 4)"},
-    {"english": "chickpeas (dry, wet x 2)"     , "category`": "staples"   , "ingredient" : "kichererbsen (trocken, nass x 2)"},
+    {"english": "chickpeas (dry, wet x 2)"     , "category": "staples"   , "ingredient" : "kichererbsen (trocken, nass x 2)"},
     {"english": "oats"                         , "category": "breakfast" , "ingredient" : "haferflocken"                    },
     {"english": "vegan sugar cereals"          , "category": "breakfast" , "ingredient" : "veganes zuckermüsli"             },
     {"english": "coffee"                       , "category": "breakfast" , "ingredient" : "kaffe"                           },
