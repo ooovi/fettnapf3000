@@ -10,6 +10,7 @@ import markdown2
 DEFAULT_PORT = 8080
 CONTENT_TYPE = "text/html; charset=utf-8"
 
+
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/recipes":
@@ -34,7 +35,7 @@ class MyServer(BaseHTTPRequestHandler):
         button = "Stelle Menge pro Gericht ein und drueck auf Kalkulation!"
         button += "<button onclick=\"window.location.href='calculate?recipe=apfelkrapfen.txt&quantity=1000';\">Kalkulation</button>"
         self.wfile_write(button)
-        self.wfile_write(self.test_form())
+        self.wfile_write(self.create_recipes_form())
         self.wfile_write(self.create_recipes_table())
         self.wfile_write("</body></html>")
 
@@ -47,15 +48,17 @@ class MyServer(BaseHTTPRequestHandler):
         html_string += "</table>"
         return html_string
 
-    def test_form(self):
-        html_string = " <form action=\"/calculate\" method=\"get\">" \
-                       "  <label for=\"bollo.txt\">bollo:</label>" \
-                       "  <input type=\"text\" id=\"id0\" name=\"bollo.txt\"><br><br>" \
-                       "  <label for=\"ful.txt\">ful:</label>" \
-                       "  <input type=\"text\" id=\"id1\" name=\"ful.txt\"><br><br>" \
-                       "  <input type=\"submit\" value=\"Submit\">" \
-                       "</form> "
+    def create_recipes_form(self):
+        recipes = os.listdir("recipes")
+        html_string = " <form action=\"/calculate\" method=\"get\">"
+        for recipe in recipes:
+            html_string += "<label for=\"" + recipe + "\">" + recipe + ":</label><input type=\"number\" name=\"" + recipe + "\"><br>"
+        html_string += "<input type=\"submit\" value=\"Kalkulation\"></form> "
         return html_string
+
+# "  <label for=\"bollo.txt\">bollo:</label>" \
+# "  <input type=\"number\" id=\"id0\" name=\"bollo.txt\"><br><br>"
+
 
     def get_calculate(self):
         self.send_response(200)
