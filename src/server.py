@@ -6,6 +6,7 @@ import planner
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import markdown2
 
+DEFAULT_ADDR = ''
 DEFAULT_PORT = 8080
 CONTENT_TYPE = "text/html; charset=utf-8"
 
@@ -72,9 +73,14 @@ class MyServer(BaseHTTPRequestHandler):
         self.wfile.write(bytes(string, "utf-8"))
 
 os.chdir('.')
+if len(sys.argv) == 3:
+    addr = sys.argv[1]
+    port = sys.argv[2]
 if len(sys.argv) == 2:
+    addr = DEFAULT_ADDR
     port = sys.argv[1]
 else:
+    addr = DEFAULT_ADDR
     port = DEFAULT_PORT
-server_object = HTTPServer(server_address=('', int(port)), RequestHandlerClass=MyServer)
+server_object = HTTPServer(server_address=(addr, int(port)), RequestHandlerClass=MyServer)
 server_object.serve_forever()
