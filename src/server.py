@@ -31,12 +31,15 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(bytes("<html><head><title>fettnapf 3000 recipes</title></head>", "utf-8"))
         self.wfile.write(bytes("<body>", "utf-8"))
+        button = "Stelle Menge pro Gericht ein und drueck auf Kalkulation!"
+        button += "<button onclick=\"window.location.href='calculate?recipe=apfelkrapfen.txt&quantity=1000';\">Kalkulation</button>"
+        self.wfile.write(bytes(button, "utf-8"))
         self.wfile.write(bytes(self.create_recipes_table(), "utf-8"))
         self.wfile.write(bytes("</body></html>", "utf-8"))
 
     def create_recipes_table(self):
-        html_string = "<table>" \
-                      "<tr> <th>Recipe</th> <th>Quantity</th> </tr>"
+        html_string = "<table>"
+        html_string += "<tr> <th>Rezept</th> <th>Menge</th> </tr>"
         recipes = os.listdir("recipes")
         for recipe in recipes:
             html_string += "<tr> <td>" + recipe + "</td> <td> <input type=\"number\"> </td> </tr>"
