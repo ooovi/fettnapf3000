@@ -1,4 +1,5 @@
 import os
+import sys
 import urllib.parse
 import parser
 import planner
@@ -6,6 +7,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 #from pypandoc import convert_text
 import markdown2
 
+DEFAULT_PORT = 8080
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -58,8 +60,9 @@ class MyServer(BaseHTTPRequestHandler):
 
 
 os.chdir('.')
-# Create server object listening the port 80
-# server_object = HTTPServer(server_address=('', 8080), RequestHandlerClass=CGIHTTPRequestHandler)
-server_object = HTTPServer(server_address=('', 8081), RequestHandlerClass=MyServer)
-# Start the web server
+if len(sys.argv) == 2:
+    port = sys.argv[1]
+else:
+    port = DEFAULT_PORT
+server_object = HTTPServer(server_address=('', int(port)), RequestHandlerClass=MyServer)
 server_object.serve_forever()
