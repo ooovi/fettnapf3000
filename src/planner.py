@@ -52,7 +52,7 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
                 max_servings = max(max_servings, n_servings)
 
                 # collect recipe for menu overview
-                menu_list += f"- {n_servings:g} Portionen-- {recipe.name.capitalize()}\n"
+                menu_list += f"- {n_servings:g} Portionen {recipe.name.capitalize()}\n"
 
                 # collect recipe string
                 if n_servings != 0 and recipe.name != "misc":
@@ -63,7 +63,7 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
 
                     # ingredients table
                     recipe_list += "| kg | Zutat | *pro Portion* |\n"
-                    recipe_list += "|----|-------------|---------------|\n"
+                    recipe_list += "|----|-------------|:---------------:|\n"
                     recipe_list += "\n".join([f"| {amount:g} | {ingredient.capitalize()} | *{recipe.ingredients[ingredient]:g}* |"\
                                               for (ingredient, amount) in scaled_ingredients])
                     recipe_list += "\n| -------- | | -------- |\n"
@@ -152,7 +152,7 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
     # printing two shopping lists cuz it handy
     #text += shopping_list
     #text += md_pagebreak
-    text += "# Einkaufsliste\n\n"
+    text += "\n# Einkaufsliste\n\n"
     text += shopping_list
     text += md_pagebreak
     
