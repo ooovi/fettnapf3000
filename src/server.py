@@ -62,22 +62,23 @@ class MyServer(BaseHTTPRequestHandler):
 
     def get_calculate(self):
         self.send_response(200)
-        # self.send_header('Content-type', 'application/pdf')
         self.send_header("Content-type", CONTENT_TYPE)
         self.end_headers()
         params = urllib.parse.parse_qs(self.path[self.path.rfind("?") + 1:])
-        recipe_name = params.get("recipe").pop()
-        quantity = int(params.get("quantity").pop())
-        recipe = parser.parse_recipe("recipes/" + recipe_name)
-        menu = {"recipe": [(recipe, quantity)]}
-        
+
+        menu = {}
+        for recipe_name in params:
+            recipe = parser.parse_recipe("recipes/" + recipe_name)
+            n_servings = int(params.get(recipe_name).pop())
+            if "Rezepte" in menu:
+                 menu["Rezepte"].append((recipe, n_servings))
+            else:
+                 menu["Rezepte"] = [(recipe, n_servings)]
+            
         plan = planner.plan(menu)
         plan_html = markdown2.markdown(plan, extras=['tables','task_list'])
         
-        self.wfile_write("<html><head><title>"
-                               + str(quantity)
-                               + " " + recipe_name
-                               + "</title></head>")
+        self.wfile_write("<html><head><title>Fettnapf3000 power kalkulator!</title></head>")
         self.wfile_write("<body>")
         self.wfile_write(plan_html)
         self.wfile_write("</body></html>")
