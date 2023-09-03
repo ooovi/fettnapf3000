@@ -34,6 +34,7 @@ class MyServer(BaseHTTPRequestHandler):
         button = "Stelle Menge pro Gericht ein und drueck auf Kalkulation!"
         button += "<button onclick=\"window.location.href='calculate?recipe=apfelkrapfen.txt&quantity=1000';\">Kalkulation</button>"
         self.wfile_write(button)
+        self.wfile_write(self.test_form())
         self.wfile_write(self.create_recipes_table())
         self.wfile_write("</body></html>")
 
@@ -44,6 +45,16 @@ class MyServer(BaseHTTPRequestHandler):
         for recipe in recipes:
             html_string += "<tr> <td>" + recipe + "</td> <td> <input type=\"number\"> </td> </tr>"
         html_string += "</table>"
+        return html_string
+
+    def test_form(self):
+        html_string = " <form action=\"/calculate\" method=\"get\">" \
+                       "  <label for=\"bollo.txt\">bollo:</label>" \
+                       "  <input type=\"text\" id=\"id0\" name=\"bollo.txt\"><br><br>" \
+                       "  <label for=\"ful.txt\">ful:</label>" \
+                       "  <input type=\"text\" id=\"id1\" name=\"ful.txt\"><br><br>" \
+                       "  <input type=\"submit\" value=\"Submit\">" \
+                       "</form> "
         return html_string
 
     def get_calculate(self):
