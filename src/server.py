@@ -64,12 +64,13 @@ class MyServer(BaseHTTPRequestHandler):
         params = urllib.parse.parse_qs(self.path[self.path.rfind("?") + 1:])
 
         menu = {}
-        for (recipe_name, n_servings) in zip(params.get("recipe"), params.get("quantity")):
+        for recipe_name in params:
             recipe = parser.parse_recipe("recipes/" + recipe_name)
+            n_servings = int(params.get(recipe_name).pop())
             if "Rezepte" in menu:
-                 menu["Rezepte"].append((recipe, int(n_servings)))
+                 menu["Rezepte"].append((recipe, n_servings))
             else:
-                 menu["Rezepte"] = [(recipe, int(n_servings))]
+                 menu["Rezepte"] = [(recipe, n_servings)]
             
         plan = planner.plan(menu)
         plan_html = markdown2.markdown(plan, extras=['tables','task_list'])
