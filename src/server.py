@@ -57,7 +57,7 @@ class MyServer(BaseHTTPRequestHandler):
         menu = {"recipe": [(recipe, quantity)]}
         
         plan = planner.plan(menu)
-        plan_html = markdown.markdown(plan, extras=["tables"])
+        plan_html = markdown.markdown(plan, extensions=['tables'])
         
         self.wfile.write(bytes("<html><head><title>"
                                + str(quantity)
