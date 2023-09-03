@@ -30,9 +30,19 @@ class MyServer(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", CONTENT_TYPE)
         self.end_headers()
-        self.wfile_write("<html><head><title>fettnapf 3000 recipes</title></head>")
+        self.wfile_write(
+            "<html>\
+            <head>\
+            <title>fettnapf 3000 recipes</title>\
+            <style>\
+            form  { display: table;      }\
+            p     { display: table-row;  }\
+            label { display: table-cell; }\
+            input { display: table-cell; }\
+            </style>\
+            </head>")
         self.wfile_write("<body>")
-        hint = "<strong>Stelle Menge pro Gericht ein und drueck auf Kalkulation!</strong>"  \
+        hint = "<strong>Stelle Anzahl Portionen pro Gericht ein und drueck auf Kalkulation!</strong>"  \
         "<br> Speicher danach den Link, um deine Kalkulation zu teilen.<br><br>"
         self.wfile_write(hint)
         self.wfile_write(self.create_recipes_form())
@@ -42,8 +52,11 @@ class MyServer(BaseHTTPRequestHandler):
         recipes = os.listdir("recipes")
         html_string = " <form action=\"/calculate\" method=\"get\">"
         for recipe in recipes:
-            html_string += "<label for=\"" + recipe + "\">" + recipe + ":</label><input type=\"number\" name=\"" + recipe + "\"><br>"
-        html_string += "<input type=\"submit\" value=\"Kalkulation\"></form> "
+            html_string += "<p>\
+                <label for=\"" + recipe + "\">" + os.path.splitext(recipe)[0].capitalize().replace("_"," ") + ":&ensp;</label>\
+                <input type=\"number\" name=\"" + recipe + "\" size=\"6\"><br>\
+                </p>"
+        html_string += "<input type=\"submit\" value=\"Kalkulation\"></form>"
         return html_string
 
     def get_calculate(self):
@@ -64,7 +77,7 @@ class MyServer(BaseHTTPRequestHandler):
         plan = planner.plan(menu)
         plan_html = markdown2.markdown(plan, extras=['tables','task_list'])
         
-        self.wfile_write("<html><head><title>Fettnapf3000 power kalkulator!</title></head>")
+        self.wfile_write("<html><head><title>Fettnapf3000 Power Kalkulator!</title></head>")
         self.wfile_write("<body>")
         self.wfile_write(plan_html)
         self.wfile_write("</body></html>")
