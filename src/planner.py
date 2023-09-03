@@ -52,17 +52,17 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
                 max_servings = max(max_servings, n_servings)
 
                 # collect recipe for menu overview
-                menu_list += f"- {n_servings:g} servings -- {recipe.name.capitalize()}\n"
+                menu_list += f"- {n_servings:g} Portionen-- {recipe.name.capitalize()}\n"
 
                 # collect recipe string
                 if n_servings != 0 and recipe.name != "misc":
                     scaled_ingredients = recipe.scaled_ingredients(n_servings).items()
 
                     # name header
-                    recipe_list += f"\n## {recipe.name.capitalize()}\n\n {n_servings:g} servings\n\n"
+                    recipe_list += f"\n## {recipe.name.capitalize()}\n\n {n_servings:g} Portionen\n\n"
 
                     # ingredients table
-                    recipe_list += "| kg | Ingredients | *per serving* |\n"
+                    recipe_list += "| kg | Zutat | *pro Portion* |\n"
                     recipe_list += "|----|-------------|---------------|\n"
                     recipe_list += "\n".join([f"| {amount:g} | {ingredient.capitalize()} | *{recipe.ingredients[ingredient]:g}* |"\
                                               for (ingredient, amount) in scaled_ingredients])
@@ -72,12 +72,12 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
 
                     # instructions
                     if recipe.instructions != "":
-                        recipe_list += "### Instructions\n\n"
+                        recipe_list += "### Anleitung\n\n"
                         recipe_list += f"{recipe.instructions.capitalize()} \n\n"
 
                     # materials
                     if recipe.materials != set():
-                        recipe_list += "### Special materials\n\n"
+                        recipe_list += "### Spezialequipment\n\n"
                         recipe_list += "\n".join(f"{name.capitalize()}" for name in recipe.materials) + "\n\n"
 
                     recipe_list += "\n\n"
@@ -86,7 +86,7 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
         recipe_list += md_pagebreak
 
     # make a total materials list for the overview
-    materials_list = "" if materials == set() else "\n## Special materials\n\n" +\
+    materials_list = "" if materials == set() else "\n## Spezialequipment\n\n" +\
                                                     "\n".join([f"- {item.capitalize()}" for item in materials])
 
     return menu_list, materials_list, total_weight, total_servings, max_servings, shopping_list(total_ingredients), recipe_list
@@ -116,7 +116,7 @@ def shopping_list(total_ingredients: Counter):
         md = ""
         cat_amount = 0
         for (ingredient, amount) in cat_dict[cat]:
-            md += f"- {round(amount,3):g} {ingredient.capitalize()}\n"
+            md += f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()}\n"
             cat_amount += amount
         md = f"\n### {cat.capitalize()} ({round(cat_amount,3):g} total)\n\n" + md
         return md
@@ -138,15 +138,15 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
                     max_servings, shopping_list, recipe_list) = compile_lists(menu)
     
     #text = markdown_header
-    text = "# Menu\n\n"
+    text = "# Menü\n\n"
     text += menu_list
 
     text += f"\n\n {materials_list} \n\n"
     
     text += "## Stats\n\n"
-    text += f"***Total number of servings:*** {total_servings:g}\n\n"
-    text += f"***Maximal number of servings per recipe:*** {max_servings:g}\n\n"
-    text += f"***Total ingredient weight:*** {total_weight:g} kg \n\n"
+    text += f"***Portionen insgesamt:*** {total_servings:g}\n\n"
+    text += f"***Maximale Portionen pro Rezept:*** {max_servings:g}\n\n"
+    text += f"***Gesamtgewicht der Zutaten:*** {total_weight:g} kg \n\n"
     text += md_pagebreak
     
     # printing two shopping lists cuz it handy

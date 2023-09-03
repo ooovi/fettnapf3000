@@ -5,7 +5,7 @@ import parser
 import planner
 from http.server import HTTPServer, BaseHTTPRequestHandler
 #from pypandoc import convert_text
-import markdown
+import markdown2
 
 DEFAULT_PORT = 8080
 CONTENT_TYPE = "text/html; charset=utf-8"
@@ -57,7 +57,7 @@ class MyServer(BaseHTTPRequestHandler):
         menu = {"recipe": [(recipe, quantity)]}
         
         plan = planner.plan(menu)
-        plan_html = markdown.markdown(plan, extensions=['tables'])
+        plan_html = markdown2.markdown(plan, extras=['tables','task_list'])
         
         self.wfile.write(bytes("<html><head><title>"
                                + str(quantity)
