@@ -2,13 +2,13 @@
 10 Portionen
 
 ### Zutaten
-1.0 mehl
-0.625 sojamilch
-0.25 Margerine
-0.007 trockenhefe
-0.01 zucker
-0.02 salz
-0.07 knobi
-0.1 frischer dill
-0.1 apfelessig
-0.01 pfeffer
+0.7 mehl
+0.438 sojamilch
+0.175 Margerine
+0.0049 trockenhefe
+0.007 zucker
+0.014 salz
+0.049 knobi
+0.04 frischer dill
+0.07 apfelessig
+0.007 pfeffer

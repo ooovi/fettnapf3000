@@ -6,6 +6,7 @@
 0.1 knobi
 1 brokkoli
 0.5 räuchertofu
+0.4 weißwein
 1 sojasahne
 0.15 öl
 0.025 salz
