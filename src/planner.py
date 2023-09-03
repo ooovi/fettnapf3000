@@ -137,7 +137,6 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
     (menu_list, materials_list, total_weight, total_servings,\
                     max_servings, shopping_list, recipe_list) = compile_lists(menu)
     
-    #text = markdown_header
     text = "# Menü\n\n"
     text += menu_list
 
@@ -159,16 +158,6 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
     text += recipe_list
     
     return text
-
-
-# for prettier pdfs (maybe)
-markdown_header = """
----
-fontsize: 12pt
-header-includes: |
-   \\usepackage[margin=0.7in]{geometry}
----
-"""
 
 md_pagebreak = "\n<div style=\"page-break-after: always; visibility: hidden\">\n\pagebreak</div>\n----\n"
 

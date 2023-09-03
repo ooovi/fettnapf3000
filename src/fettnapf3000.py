@@ -23,7 +23,7 @@ def main():
        plan_markdown = plan(menu)
 
        # convert to pdf using pypandoc and write it to file
-       convert_text(plan_markdown, 'pdf', format='md', outputfile=menu_file+".pdf", extra_args=['-V', 'geometry:margin=2.5cm'])
+       convert_text(plan_markdown, 'pdf', format='md', outputfile=menu_file+".pdf", extra_args=['-V', 'geometry:margin=2.5cm', '-V', 'fontsize=12pt'])
 
            
     except IOError as e:
