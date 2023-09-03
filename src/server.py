@@ -5,9 +5,10 @@ import parser
 import planner
 from http.server import HTTPServer, BaseHTTPRequestHandler
 #from pypandoc import convert_text
-import markdown2
+import markdown
 
 DEFAULT_PORT = 8080
+CONTENT_TYPE = "text/html; charset=utf-8"
 
 class MyServer(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -17,7 +18,7 @@ class MyServer(BaseHTTPRequestHandler):
             self.get_calculate()
         else:
             self.send_response(200)
-            self.send_header("Content-type", "text/html")
+            self.send_header("Content-type", CONTENT_TYPE)
             self.end_headers()
             self.wfile.write(bytes("<html><head><title>fettnapf 3000 recipes</title></head>", "utf-8"))
             self.wfile.write(bytes("<body>", "utf-8"))
@@ -26,18 +27,26 @@ class MyServer(BaseHTTPRequestHandler):
 
     def get_recipes(self):
         self.send_response(200)
-        self.send_header("Content-type", "text/html")
+        self.send_header("Content-type", CONTENT_TYPE)
         self.end_headers()
-        recipes = os.listdir("recipes")
         self.wfile.write(bytes("<html><head><title>fettnapf 3000 recipes</title></head>", "utf-8"))
         self.wfile.write(bytes("<body>", "utf-8"))
-        [self.wfile.write(bytes(recipe + "<br>", "utf-8")) for recipe in recipes]
+        self.wfile.write(bytes(self.create_recipes_table(), "utf-8"))
         self.wfile.write(bytes("</body></html>", "utf-8"))
+
+    def create_recipes_table(self):
+        html_string = "<table>" \
+                      "<tr> <th>Recipe</th> <th>Quantity</th> </tr>"
+        recipes = os.listdir("recipes")
+        for recipe in recipes:
+            html_string += "<tr> <td>" + recipe + "</td> <td> <input type=\"number\"> </td> </tr>"
+        html_string += "</table>"
+        return html_string
 
     def get_calculate(self):
         self.send_response(200)
         # self.send_header('Content-type', 'application/pdf')
-        self.send_header("Content-type", "text/html; charset=utf-8")
+        self.send_header("Content-type", CONTENT_TYPE)
         self.end_headers()
         params = urllib.parse.parse_qs(self.path[self.path.rfind("?") + 1:])
         recipe_name = params.get("recipe").pop()
