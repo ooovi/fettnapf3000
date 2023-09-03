@@ -1,6 +1,6 @@
 from collections import Counter
-# from tinydb import Query
-# from metrodb import metrodb, cat_sort
+from tinydb import Query
+from metrodb import metrodb, cat_sort
 
 class Recipe:
     def __init__(self, name: str, ingredients: Counter, instructions: str, materials: set[str]):
@@ -102,14 +102,14 @@ def shopping_list(total_ingredients: Counter):
             cat_dict[cat] = [(ingredient, amount)]
 
     # split ingredients wrt market categories
-    # User = Query()
+    User = Query()
     for (ingredient, amount) in total_ingredients.items():
-        # db_entries = metrodb.search(User.ingredient == ingredient)
-        # if db_entries == []:
-        #     insert("none", ingredient, amount)
-        # else:
-        #     cat = db_entries[0]["category"]
-        insert("cat", ingredient, amount)
+        db_entries = metrodb.search(User.ingredient == ingredient)
+        if db_entries == []:
+            insert("none", ingredient, amount)
+        else:
+            cat = db_entries[0]["category"]
+            insert(cat, ingredient, amount)
 
     # print one category
     def cat_markdown(cat: str):
@@ -123,8 +123,7 @@ def shopping_list(total_ingredients: Counter):
 
     # print all categories
     slist = ""
-    # for cat in sorted(cat_dict.keys(), key=cat_sort):
-    for cat in cat_dict.keys():
+    for cat in sorted(cat_dict.keys(), key=cat_sort):
         if cat == "none": # put unknown category first
             slist = cat_markdown(cat) + slist
         else:

@@ -3,7 +3,8 @@ import urllib.parse
 import parser
 import planner
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from pypandoc import convert_text
+#from pypandoc import convert_text
+import markdown
 
 
 class MyServer(BaseHTTPRequestHandler):
@@ -51,7 +52,7 @@ class MyServer(BaseHTTPRequestHandler):
                                + " " + recipe_name
                                + "</title></head>", "utf-8"))
         self.wfile.write(bytes("<body>", "utf-8"))
-        self.wfile.write(bytes(convert_text(plan, 'html', format='md'), "utf-8"))
+        self.wfile.write(bytes(markdown.markdown(plan, extensions=['extra']), "utf-8"))
         self.wfile.write(bytes("</body></html>", "utf-8"))
         # with open(file_path, 'rb') as file:
         #     self.wfile.write(file.read())
@@ -61,6 +62,6 @@ class MyServer(BaseHTTPRequestHandler):
 os.chdir('.')
 # Create server object listening the port 80
 # server_object = HTTPServer(server_address=('', 8080), RequestHandlerClass=CGIHTTPRequestHandler)
-server_object = HTTPServer(server_address=('', 8080), RequestHandlerClass=MyServer)
+server_object = HTTPServer(server_address=('', 8081), RequestHandlerClass=MyServer)
 # Start the web server
 server_object.serve_forever()
