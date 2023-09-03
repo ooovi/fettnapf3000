@@ -62,12 +62,13 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
                     recipe_list += f"\n## {recipe.name.capitalize()}\n\n {n_servings:g} Portionen\n\n"
 
                     # ingredients table
-                    recipe_list += "| kg | Zutat | *pro Portion* |\n"
+                    recipe_list += "| kg | Zutat | *kg pro Portion* |\n"
                     recipe_list += "|----|-------------|:---------------:|\n"
                     recipe_list += "\n".join([f"| {amount:g} | {ingredient.capitalize()} | *{recipe.ingredients[ingredient]:g}* |"\
                                               for (ingredient, amount) in scaled_ingredients])
-                    recipe_list += "\n| -------- | | -------- |\n"
-                    recipe_list += f"| {n_servings * recipe.total_weight:g} | | {recipe.total_weight:g} |\n"
+                    
+                    recipe_list += f"\nGesamtgewicht: {n_servings * recipe.total_weight:g} kg\n"
+                    recipe_list += f"\nGewicht pro Portion: {recipe.total_weight:g} kg\n"
                     recipe_list += "\n\n"
 
                     # instructions
