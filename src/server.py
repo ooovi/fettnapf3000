@@ -4,7 +4,6 @@ import urllib.parse
 import parser
 import planner
 from http.server import HTTPServer, BaseHTTPRequestHandler
-#from pypandoc import convert_text
 import markdown2
 
 DEFAULT_PORT = 8080
@@ -32,21 +31,11 @@ class MyServer(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile_write("<html><head><title>fettnapf 3000 recipes</title></head>")
         self.wfile_write("<body>")
-        button = "Stelle Menge pro Gericht ein und drueck auf Kalkulation!"
-        button += "<button onclick=\"window.location.href='calculate?recipe=apfelkrapfen.txt&quantity=1000';\">Kalkulation</button>"
-        self.wfile_write(button)
+        hint = "<strong>Stelle Menge pro Gericht ein und drueck auf Kalkulation!</strong>"  \
+        "<br> Speicher danach den Link, um deine Kalkulation zu teilen.<br><br>"
+        self.wfile_write(hint)
         self.wfile_write(self.create_recipes_form())
-        self.wfile_write(self.create_recipes_table())
         self.wfile_write("</body></html>")
-
-    def create_recipes_table(self):
-        html_string = "<table>"
-        html_string += "<tr> <th>Rezept</th> <th>Menge</th> </tr>"
-        recipes = os.listdir("recipes")
-        for recipe in recipes:
-            html_string += "<tr> <td>" + recipe + "</td> <td> <input type=\"number\"> </td> </tr>"
-        html_string += "</table>"
-        return html_string
 
     def create_recipes_form(self):
         recipes = os.listdir("recipes")
@@ -55,10 +44,6 @@ class MyServer(BaseHTTPRequestHandler):
             html_string += "<label for=\"" + recipe + "\">" + recipe + ":</label><input type=\"number\" name=\"" + recipe + "\"><br>"
         html_string += "<input type=\"submit\" value=\"Kalkulation\"></form> "
         return html_string
-
-# "  <label for=\"bollo.txt\">bollo:</label>" \
-# "  <input type=\"number\" id=\"id0\" name=\"bollo.txt\"><br><br>"
-
 
     def get_calculate(self):
         self.send_response(200)
