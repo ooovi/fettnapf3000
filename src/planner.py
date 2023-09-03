@@ -137,8 +137,8 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
     (menu_list, materials_list, total_weight, total_servings,\
                     max_servings, shopping_list, recipe_list) = compile_lists(menu)
     
-    text = markdown_header
-    text += "# Menu\n\n"
+    #text = markdown_header
+    text = "# Menu\n\n"
     text += menu_list
 
     text += f"\n\n {materials_list} \n\n"
@@ -150,8 +150,9 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
     text += md_pagebreak
     
     # printing two shopping lists cuz it handy
-    text += shopping_list
-    text += md_pagebreak
+    #text += shopping_list
+    #text += md_pagebreak
+    text += "# Einkaufsliste\n\n"
     text += shopping_list
     text += md_pagebreak
     
@@ -160,6 +161,7 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
     return text
 
 
+# for prettier pdfs (maybe)
 markdown_header = """
 ---
 fontsize: 12pt
@@ -168,7 +170,7 @@ header-includes: |
 ---
 """
 
-md_pagebreak = "\n<div style=\"page-break-after: always; visibility: hidden\">\n\pagebreak</div>\n"
+md_pagebreak = "\n<div style=\"page-break-after: always; visibility: hidden\">\n\pagebreak</div>\n----\n"
 
 general_text = """
 ## Ort klären:
@@ -178,7 +180,7 @@ general_text = """
 - Brenner-Unterlage
 - Stromanschluss
 - Müllentsorgung
-- Tische/ Bänke
+- Tische/Bänke
 - Lagerraum
 - Zufahrt für das Auto/Lastenrad
 - Unterstand/Zelt

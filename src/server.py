@@ -4,7 +4,7 @@ import parser
 import planner
 from http.server import HTTPServer, BaseHTTPRequestHandler
 #from pypandoc import convert_text
-import markdown
+import markdown2
 
 
 class MyServer(BaseHTTPRequestHandler):
@@ -35,7 +35,7 @@ class MyServer(BaseHTTPRequestHandler):
     def get_calculate(self):
         self.send_response(200)
         # self.send_header('Content-type', 'application/pdf')
-        self.send_header("Content-type", "text/html")
+        self.send_header("Content-type", "text/html; charset=utf-8")
         self.end_headers()
         params = urllib.parse.parse_qs(self.path[self.path.rfind("?") + 1:])
         recipe_name = params.get("recipe").pop()
@@ -44,19 +44,17 @@ class MyServer(BaseHTTPRequestHandler):
         # self.wfile.write(bytes("quantity: " + str(quantity) + "<br>", "utf-8"))
         recipe = parser.parse_recipe("recipes/" + recipe_name)
         menu = {"recipe": [(recipe, quantity)]}
+        
         plan = planner.plan(menu)
-        file_path = "/tmp/result.pdf"
-        # convert_text(plan, 'pdf', format='md', outputfile=file_path)
+        plan_html = markdown2.markdown(plan, extras=["tables"])
+        
         self.wfile.write(bytes("<html><head><title>"
                                + str(quantity)
                                + " " + recipe_name
                                + "</title></head>", "utf-8"))
         self.wfile.write(bytes("<body>", "utf-8"))
-        self.wfile.write(bytes(markdown.markdown(plan, extensions=['extra']), "utf-8"))
+        self.wfile.write(bytes(plan_html, "utf-8"))
         self.wfile.write(bytes("</body></html>", "utf-8"))
-        # with open(file_path, 'rb') as file:
-        #     self.wfile.write(file.read())
-        # os.remove(file_path)
 
 
 os.chdir('.')
