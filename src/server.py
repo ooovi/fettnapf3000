@@ -77,7 +77,18 @@ class MyServer(BaseHTTPRequestHandler):
         plan = planner.plan(menu)
         plan_html = markdown2.markdown(plan, extras=['tables','task_list'])
         
-        self.wfile_write("<html><head><title>Fettnapf3000 Power Kalkulator!</title></head>")
+        self.wfile_write("<html>\
+            <head>\
+            <style>\
+            table {\
+               border-collapse: collapse;\
+               margin: 25px 0;\
+               min-width: 400px;\
+            }\
+            table tr:nth-child(even) td { background-color: #f2f2f2;}\
+            table td { padding: 10px; }\
+            </style>\
+            <title>Fettnapf3000 Power Kalkulator!</title></head>")
         self.wfile_write("<body>")
         self.wfile_write(plan_html)
         self.wfile_write("</body></html>")
