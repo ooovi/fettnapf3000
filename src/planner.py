@@ -160,7 +160,7 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
     
     return text
 
-md_pagebreak = "\n<div style=\"page-break-after: always; visibility: hidden\">\n\pagebreak</div>\n----\n"
+md_pagebreak = "\n<div style=\"page-break-after: always; visibility: hidden\">\n\pagebreak</div>\n"
 
 general_text = """
 ## Ort klären:

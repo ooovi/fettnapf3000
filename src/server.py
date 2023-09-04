@@ -80,6 +80,12 @@ class MyServer(BaseHTTPRequestHandler):
         self.wfile_write("<html>\
             <head>\
             <style>\
+            body { \
+            	max-width: 1080px; \
+            	margin: 10 auto !important; \
+            	float: none !important; \
+            }\
+            h1 {border-top: 2px solid lightgrey; padding-top:50px}\
             table {\
                border-collapse: collapse;\
                margin: 25px 0;\
