@@ -15,6 +15,7 @@ from pyparsing import (
     CharsNotIn,
     tokenMap,
     nums,
+    MatchFirst
 )
 from collections import Counter
 from planner import Recipe
@@ -43,7 +44,14 @@ servings = weight + Suppress("Portionen") + linebreaks
 ingredient = weight + Suppress(ZeroOrMore(' ')) + word + linebreak
 ingredient.setParseAction(lambda l : tuple(reversed(l))) # reverse so it fits the Counter constructor
 
-ingredients = section("Zutaten", OneOrMore(ingredient))
+ingredient_subsection = Suppress("#### ") + word + linebreaks + OneOrMore(ingredient) + maybebreaks
+ingredient_subsection.setParseAction(lambda l : (l[0], l[1:]))
+
+ingredients_notitle = OneOrMore(ingredient) + maybebreaks
+ingredients_notitle.setParseAction(lambda l : ("", l))
+
+ingredients = section("Zutaten", MatchFirst([ingredients_notitle, OneOrMore(ingredient_subsection)]))
+
 
 instructions = section("Anleitung", OneOrMore(CharsNotIn('\n')))
 
@@ -72,13 +80,15 @@ def build_recipe(recipe_string):
     if servings == 0:
         raise ParseError(f"Error parsing recipe {name}: zero number of servings")
     else:
-        recipe_counter = Counter({ingredient: amount / servings
-                                              for (ingredient, amount) in parsed_recipe["ingredients"]})
+        counters = []
+        for (subsection, ingredients) in parsed_recipe["ingredients"]:
+            counters.append((subsection, Counter({ingredient: amount / servings
+                                              for (ingredient, amount) in ingredients})))
 
         instr = parsed_recipe["instructions"][0] if "instructions" in parsed_recipe else ""
         mat = set(parsed_recipe["materials"]) if "materials" in parsed_recipe else set()
 
-        return Recipe(name, recipe_counter, instr, mat)
+        return Recipe(name, counters, instr, mat)
 
 
 def parse_recipe(path):

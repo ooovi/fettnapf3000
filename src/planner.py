@@ -3,15 +3,18 @@ from tinydb import Query
 from metrodb import metrodb, cat_sort
 
 class Recipe:
-    def __init__(self, name: str, ingredients: Counter, instructions: str, materials: set[str]):
+    def __init__(self, name: str, ingredients: [(str,Counter)], instructions: str, materials: set[str]):
         self.name = name
         self.ingredients = ingredients
         self.instructions = instructions
         self.materials = materials
-        self.total_weight = sum([count for (ingredient,count) in ingredients.items()])
+        self.total_weight = sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in ingredients])
 
     def scaled_ingredients(self, n_servings: float):
-        return Counter({i : n_servings * self.ingredients[i] for i in self.ingredients})
+        scaled = []
+        for (section, ingredients) in self.ingredients:
+            scaled.append((section, Counter({i : n_servings * ingredients[i] for i in ingredients})))
+        return scaled
 
 # given a dict {sections -> (recipe, n_servings)}, compute:
 #   - a menu overview markdown string
@@ -40,7 +43,8 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
         for (recipe, n_servings) in menu[category]:
 
             # collect ingredients for shopping list
-            total_ingredients += recipe.scaled_ingredients(n_servings)
+            for (_, ingredients) in recipe.scaled_ingredients(n_servings):
+                total_ingredients += ingredients
 
             # collect materials
             materials |= recipe.materials
@@ -56,17 +60,22 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
 
                 # collect recipe string
                 if n_servings != 0 and recipe.name != "misc":
-                    scaled_ingredients = recipe.scaled_ingredients(n_servings).items()
+                    scaled_recipe = recipe.scaled_ingredients(n_servings)
 
                     # name header
                     recipe_list += f"\n## {recipe.name.capitalize()}\n\n {n_servings:g} Portionen\n\n"
 
-                    # ingredients table
-                    recipe_list += "| kg | Zutat | *kg pro Portion* |\n"
-                    recipe_list += "|----|-------------|:---------------:|\n"
-                    recipe_list += "\n".join([f"| {amount:g} | {ingredient.capitalize()} | *{recipe.ingredients[ingredient]:g}* |"\
-                                              for (ingredient, amount) in scaled_ingredients])
-                    
+                    for (subsection, scaled_ingredients) in scaled_recipe:
+                        if subsection != "":
+                            recipe_list += "#### " + subsection.capitalize() + "\n"
+    
+                        # ingredients table
+                        recipe_list += "| kg | Zutat | *kg pro Portion* |\n"
+                        recipe_list += "|----|-------------|:---------------:|\n"
+                        recipe_list += "\n".join([f"| {amount:g} | {ingredient.capitalize()} |  *{amount/n_servings:g}* |"\
+                                                  for (ingredient, amount) in scaled_ingredients.items()])
+                        recipe_list += "\n"
+                        
                     recipe_list += f"\nGesamtgewicht: {n_servings * recipe.total_weight:g} kg\n"
                     recipe_list += f"\nGewicht pro Portion: {recipe.total_weight:g} kg\n"
                     recipe_list += "\n\n"
