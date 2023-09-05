@@ -2,22 +2,29 @@
 10 Portionen
 
 ### Zutaten
+#### Bollo
 0.5 sojahack (trocken)
 0.5 rote zwiebeln
 0.5 möhren
 0.5 sojasahne
 0.025 knobi
 1.5 dosentomaten (passiert)
-0.1 balsamico
 0.1 helle sojasauce (glutenfrei)
+0.1 balsamico
 0.15 öl
-0.6 lasagneplatten
+1.2 pasta
 0.4 rotwein
-1.5 sojamilch
-0.15 margerine
-0.15 mehl
-0.001 muskat
 0.005 lorbeer
 0.001 chili (pulver)
 0.02 salz
 0.01 pfeffer
+
+#### Platten
+0.6 lasagneplatten
+
+#### Bechamel
+1.5 sojamilch
+0.15 margerine
+0.15 mehl
+0.001 muskat
+0.01 salz

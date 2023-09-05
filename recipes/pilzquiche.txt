@@ -2,17 +2,28 @@
 10 Portionen
 
 ### Zutaten
+#### Teig
 0.5 mehl
 0.375 margerine
+0.01 salz
+
+#### Füllung pamps
 0.3 naturtofu
 0.45 sojajoghurt
 0.05 stärke
+0.01 kurkuma
+0.05 hefeflocken
+0.01 Kala namak (eiersalz)
+0.01 salz
+
+#### Füllung gebraten
 1.0 champis
 0.5 räuchertofu
 0.3 zwiebeln
 0.04 knobi
-0.1 zucker
+0.01 zucker
 0.1 weißwein
-0.02 salz
 0.01 pfeffer
-0.01 kurkuma
+
+### Anleitung
+Teig mit wasser kneten, vorbacken!
