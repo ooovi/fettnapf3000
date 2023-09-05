@@ -27,7 +27,13 @@ class RecipePage:
            <br> Speicher danach den Link, um deine Kalkulation zu teilen.<br><br>
            {self.create_recipes_form()}
          </body>
-        </html>"""
+         <center>
+         <footer>
+           <p>made with &#127814; by team geil</p>
+           <p>contribute on <a href="https://github.com/ooovi/fettnapf3000">github</a></p>
+         </footer>
+         </center>
+         </html>"""
 
     def create_recipes_form(self):
         recipes = os.listdir("../recipes")
