@@ -1,4 +1,7 @@
-html { background-color: #f2f2f2; }
+html {
+  background-color: #f2f2f2;
+}
+*{ font-family: "Lucida Console", "Courier New", monospace; }
 body { 
  max-width: 400px;
  margin-right:  auto;
