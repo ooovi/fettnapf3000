@@ -1,0 +1,18 @@
+body { 
+ max-width: 400px;
+ margin: 100px auto;
+}
+form  { display: table; 
+    margin-left: auto;
+    margin-right: auto;}
+p     { display: table-row;  }
+label { display: table-cell; }
+input { display: table-cell; }
+form input[type="submit"] {
+    display: block;
+    margin: 30 auto;
+}
+.balanced {
+  max-inline-size: 50ch;
+  text-wrap: balance;
+}

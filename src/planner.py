@@ -67,11 +67,11 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
 
                     for (subsection, scaled_ingredients) in scaled_recipe:
                         if subsection != "":
-                            recipe_list += "#### " + subsection.capitalize() + "\n"
+                            recipe_list += "\n#### " + subsection.capitalize() + "\n"
     
                         # ingredients table
                         recipe_list += "| kg | Zutat | *kg pro Portion* |\n"
-                        recipe_list += "|----|-------------|:---------------:|\n"
+                        recipe_list += "|:----|:-------------|:---------------:|\n"
                         recipe_list += "\n".join([f"| {amount:g} | {ingredient.capitalize()} |  *{amount/n_servings:g}* |"\
                                                   for (ingredient, amount) in scaled_ingredients.items()])
                         recipe_list += "\n"
