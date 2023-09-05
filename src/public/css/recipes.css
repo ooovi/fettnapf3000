@@ -1,7 +1,7 @@
+*{ font-family: "Lucida Console", "Courier New", monospace; }
 html {
   background-color: #f2f2f2;
 }
-*{ font-family: "Lucida Console", "Courier New", monospace; }
 body { 
  max-width: 400px;
  margin-right:  auto;
@@ -18,8 +18,7 @@ p     { display: table-row;  }
 label { display: table-cell; }
 input { display: table-cell; }
 input[type="submit"] {
-    display: block;
-    margin: 30 auto;
+    margin: 30 0 80 60;
     border: none;
     font-size: 24px;
     padding: 14px 32px;
