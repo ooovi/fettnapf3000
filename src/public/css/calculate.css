@@ -1,8 +1,12 @@
+html { background-color: #f2f2f2; }
 body { 
+ background-color: white;
  max-width: 600px;
- margin: 100px auto;
+ margin-right:  auto;
+ margin-left:  auto;
+ border: 50px solid white;
 }
-h1 {border-top: 2px solid lightgrey; padding-top:50px}
+h1 {border-top: 2px solid #f2f2f2; padding-top:50px}
 table {
  border-collapse: collapse;
  margin: 25px 0;

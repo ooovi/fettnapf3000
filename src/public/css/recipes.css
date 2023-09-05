@@ -1,16 +1,25 @@
+html { background-color: #f2f2f2; }
 body { 
  max-width: 400px;
- margin: 100px auto;
+ margin-right:  auto;
+ margin-left:  auto;
+ background-color: white;
+ border: 50px solid white;
 }
-form  { display: table; 
+form  {
+    display: table; 
     margin-left: auto;
-    margin-right: auto;}
+    margin-right: auto;
+}
 p     { display: table-row;  }
 label { display: table-cell; }
 input { display: table-cell; }
-form input[type="submit"] {
+input[type="submit"] {
     display: block;
     margin: 30 auto;
+    border: none;
+    font-size: 24px;
+    padding: 14px 32px;
 }
 .balanced {
   max-inline-size: 50ch;

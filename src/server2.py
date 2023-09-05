@@ -14,20 +14,26 @@ class RecipePage:
             <title>fettnapf 3000 recipes</title>
           </head>
           <body>
-           <strong>Stelle Anzahl Portionen pro Gericht ein und drueck auf Kalkulation!</strong>
+           <center><p style="font-size:70px;">
+            &#127814;
+           </p></center>
+           <strong>Stelle Anzahl Portionen pro Gericht ein und drück auf Kalkulation!</strong>
            <br> Speicher danach den Link, um deine Kalkulation zu teilen.<br><br>
            {self.create_recipes_form()}
-          </body>
+         </body>
         </html>"""
-   
+
     def create_recipes_form(self):
         recipes = os.listdir("../recipes")
+        recipes.sort()
         html_string = " <form action=\"/calculate\" method=\"get\">"
         for recipe in recipes:
-            html_string += "<p>\
-                <label for=\"" + recipe + "\">" + os.path.splitext(recipe)[0].capitalize().replace("_"," ") + ":&ensp;</label>\
-                <input type=\"number\" name=\"" + recipe + "\" size=\"6\"><br>\
-                </p>"
+            html_string += f"""<p>
+                <label for="{recipe}">
+                 {os.path.splitext(recipe)[0].capitalize().replace("_"," ")}:&ensp;
+                </label>
+                <input type="number" name="{recipe}" size="6"><br>
+                </p>"""
         html_string += "<input type=\"submit\" value=\"Kalkulation\"></form>"
         return html_string
 
@@ -47,13 +53,18 @@ class CalculatePage:
         plan = planner.plan(menu)
 
         extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
-        plan_html = markdown.markdown(plan, extensions=['tables','pymdownx.tasklist'], extension_configs=extension_configs)
+        plan_html = markdown.markdown(plan,
+            extensions=['tables','pymdownx.tasklist'],
+            extension_configs=extension_configs)
 
         return f"""<html>
              <head>
               <link href="../static/css/calculate.css" rel="stylesheet">
               <title>Fettnapf3000 Power Kalkulator!</title>
              </head>
+           <center><p style="font-size:70px;">
+            &#127814;
+           </p></center>
              <body>
               {plan_html}
              </body>
