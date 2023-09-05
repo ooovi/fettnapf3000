@@ -11,7 +11,13 @@ class RecipePage:
         return f"""<html>
           <head>
             <link href="./static/css/recipes.css" rel="stylesheet">
-            <title>fettnapf 3000 recipes</title>
+            <link rel="icon"
+                  href="data:image/svg+xml,
+                        <svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22>
+                         <text y=%22.9em%22 font-size=%2290%22>&#127814;</text>
+                        </svg>"
+            >
+            <title>fettnapf3000 Power Kalkulator!</title>
           </head>
           <body>
            <center><p style="font-size:70px;">
@@ -60,10 +66,16 @@ class CalculatePage:
         return f"""<html>
              <head>
               <link href="../static/css/calculate.css" rel="stylesheet">
-              <title>Fettnapf3000 Power Kalkulator!</title>
+              <link rel="icon"
+                    href="data:image/svg+xml,
+                          <svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22>
+                           <text y=%22.9em%22 font-size=%2290%22>&#127814;</text>
+                          </svg>"
+              >
+              <title>fettnapf3000 Power Kalkulator!</title>
              </head>
            <center><p style="font-size:70px;">
-            &#127814;
+            <a href="/">&#127814;</a>
            </p></center>
              <body>
               {plan_html}
