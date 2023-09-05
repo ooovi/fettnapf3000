@@ -53,7 +53,8 @@ ingredients_notitle.setParseAction(lambda l : ("", l))
 ingredients = section("Zutaten", MatchFirst([ingredients_notitle, OneOrMore(ingredient_subsection)]))
 
 
-instructions = section("Anleitung", OneOrMore(CharsNotIn('\n')))
+instructions = section("Anleitung", OneOrMore(CharsNotIn('\n') + linebreak))
+instructions.setParseAction(lambda l: '\n'.join(l))
 
 materials = section("Material", OneOrMore(word + linebreak))
 

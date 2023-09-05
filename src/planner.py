@@ -83,7 +83,7 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
                     # instructions
                     if recipe.instructions != "":
                         recipe_list += "### Anleitung\n\n"
-                        recipe_list += f"{recipe.instructions.capitalize()} \n\n"
+                        recipe_list += f"{recipe.instructions} \n\n"
 
                     # materials
                     if recipe.materials != set():
