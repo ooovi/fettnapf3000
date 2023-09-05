@@ -24,3 +24,6 @@ table th { padding: 10px;}
   margin: 0 4px 0.25em -20px;
   vertical-align: middle;
 }
+h1, h2, h3, h4, ul, li, p, table {
+  
+font-family: "Lucida Console", "Courier New", monospace;}

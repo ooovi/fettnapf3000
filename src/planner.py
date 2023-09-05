@@ -152,7 +152,7 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
 
     text += f"\n\n {materials_list} \n\n"
     
-    text += "## Stats\n\n"
+    text += "### Stats\n\n"
     text += f"***Portionen insgesamt:*** {total_servings:g}\n\n"
     text += f"***Maximale Portionen pro Rezept:*** {max_servings:g}\n\n"
     text += f"***Gesamtgewicht der Zutaten:*** {total_weight:g} kg \n\n"
