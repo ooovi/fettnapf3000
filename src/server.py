@@ -6,6 +6,7 @@ import pymdownx
 import planner
 import parser
 from random import choice
+import urllib.parse
 
 def randomoji():
     return choice(["&#127814;",
@@ -79,7 +80,7 @@ class RequestPage:
         clean_request = { (r,n) for (r,n) in kwargs.items() if n }
         if len(clean_request) != len(kwargs):
             raise cherrypy.HTTPRedirect(
-                "/calculate/?" + '&'.join(f"{r}={n}" for (r,n) in clean_request)
+                "/calculate/?" + '&'.join(f"{urllib.parse.quote(r)}={n}" for (r,n) in clean_request)
             )
 
 class CalculatePage:
