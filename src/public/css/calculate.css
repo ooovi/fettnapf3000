@@ -7,11 +7,23 @@ body {
  margin-left:  auto;
  border: 50px solid white;
 }
-h1 {border-top: 2px solid #f2f2f2; padding-top:50px}
+h1 {
+ border-top: 2px solid #f2f2f2;
+ padding-top: 50px
+}
 table {
  border-collapse: collapse;
  margin-bottom: 50px;
  width:100%;
+}
+hr::before {
+ content: "\1F346\1F346\1F346";
+ display: block;
+ text-align: center;
+ margin: 30px;
+}
+hr{
+ border:0;
 }
 table tr:nth-child(odd) td { background-color: #f2f2f2;}
 table td { padding: 10px;}
@@ -20,8 +32,16 @@ table th { padding: 10px;}
 .task-list-item {
   list-style-type: none !important;
 }
-
 .task-list-item input[type="checkbox"] {
-  margin: 0 4px 0.25em -20px;
-  vertical-align: middle;
+ width: 20px;
+ height: 20px;
+ margin: 0 4px 0.25em -20px;
+ vertical-align: middle;
+}
+@media only screen and (max-device-width: 480px) {
+ .task-list-item  { font-size: 20px}
+ .task-list-item input[type="checkbox"] {
+  width: 30px;
+  height: 30px;
+ }
 }

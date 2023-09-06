@@ -16,6 +16,43 @@ class Recipe:
             scaled.append((section, Counter({i : n_servings * ingredients[i] for i in ingredients})))
         return scaled
 
+# make a nice markdown recipe
+def recipe_string(recipe, n_servings):
+
+    scaled_recipe = recipe.scaled_ingredients(n_servings)
+    
+    # name header
+    recipe_str = f"\n## {recipe.name.capitalize()}\n\n {n_servings:g} Portionen\n\n"
+    
+    for (subsection, scaled_ingredients) in scaled_recipe:
+        if subsection != "":
+            recipe_str += "\n#### " + subsection.capitalize() + "\n"
+        # ingredients table
+        recipe_str += "| kg | Zutat | *kg pro Portion* |\n"
+        recipe_str += "|:----|:-------------|:---------------:|\n"
+        recipe_str += "\n".join([f"| {amount:g} | {ingredient.capitalize()} |  *{amount/n_servings:g}* |"\
+                                  for (ingredient, amount) in scaled_ingredients.items()])
+        recipe_str += "\n"
+        
+    recipe_str += f"\nGesamtgewicht: {n_servings * recipe.total_weight:g} kg\n"
+    recipe_str += f"\nGewicht pro Portion: {recipe.total_weight:g} kg\n"
+    recipe_str += "\n\n"
+    
+    # instructions
+    if recipe.instructions != "":
+        recipe_str += "### Anleitung\n\n"
+        recipe_str += f"{recipe.instructions} \n\n"
+        
+    # materials
+    if recipe.materials != set():
+        recipe_str += "### Spezialequipment\n\n"
+        recipe_str += "\n".join(f"{name.capitalize()}" for name in recipe.materials) + "\n\n"
+        
+    recipe_str += "\n\n"
+    
+    return recipe_str
+
+    
 # given a dict {sections -> (recipe, n_servings)}, compute:
 #   - a menu overview markdown string
 #   - the total weight of all ingredients
@@ -40,6 +77,7 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
             menu_list += "\n### " + str(category).capitalize() + "\n\n"
             recipe_list += "\n# " + str(category).capitalize() + "\n\n"
 
+        cat_recipes = []
         for (recipe, n_servings) in menu[category]:
 
             # collect ingredients for shopping list
@@ -60,40 +98,10 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
 
                 # collect recipe string
                 if n_servings != 0 and recipe.name != "misc":
-                    scaled_recipe = recipe.scaled_ingredients(n_servings)
-
-                    # name header
-                    recipe_list += f"\n## {recipe.name.capitalize()}\n\n {n_servings:g} Portionen\n\n"
-
-                    for (subsection, scaled_ingredients) in scaled_recipe:
-                        if subsection != "":
-                            recipe_list += "\n#### " + subsection.capitalize() + "\n"
-    
-                        # ingredients table
-                        recipe_list += "| kg | Zutat | *kg pro Portion* |\n"
-                        recipe_list += "|:----|:-------------|:---------------:|\n"
-                        recipe_list += "\n".join([f"| {amount:g} | {ingredient.capitalize()} |  *{amount/n_servings:g}* |"\
-                                                  for (ingredient, amount) in scaled_ingredients.items()])
-                        recipe_list += "\n"
-                        
-                    recipe_list += f"\nGesamtgewicht: {n_servings * recipe.total_weight:g} kg\n"
-                    recipe_list += f"\nGewicht pro Portion: {recipe.total_weight:g} kg\n"
-                    recipe_list += "\n\n"
-
-                    # instructions
-                    if recipe.instructions != "":
-                        recipe_list += "### Anleitung\n\n"
-                        recipe_list += f"{recipe.instructions} \n\n"
-
-                    # materials
-                    if recipe.materials != set():
-                        recipe_list += "### Spezialequipment\n\n"
-                        recipe_list += "\n".join(f"{name.capitalize()}" for name in recipe.materials) + "\n\n"
-
-                    recipe_list += "\n\n"
+                    cat_recipes.append(recipe_string(recipe, n_servings))
 
         # pagebreak after each category
-        recipe_list += md_pagebreak
+        recipe_list += ("---").join(cat_recipes) + md_pagebreak
 
     # make a total materials list for the overview
     materials_list = "" if materials == set() else "\n## Spezialequipment\n\n" +\
