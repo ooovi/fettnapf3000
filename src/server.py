@@ -61,7 +61,7 @@ class RecipePage:
     def create_recipes_form(self):
         recipes = os.listdir("../recipes")
         recipes.sort()
-        html_string = " <form action=\"/calculate\" method=\"get\">"
+        html_string = " <form action=\"/request\" method=\"get\">"
         for recipe in recipes:
             html_string += f"""<p>
                 <label for="{recipe}">
@@ -72,16 +72,19 @@ class RecipePage:
         html_string += "<input type=\"submit\" value=\"Kalkulation\"></form>"
         return html_string
 
+class RequestPage:
+    @cherrypy.expose
+    def index(self, **kwargs):
+        # clean empty form entries from url
+        clean_request = { (r,n) for (r,n) in kwargs.items() if n }
+        if len(clean_request) != len(kwargs):
+            raise cherrypy.HTTPRedirect(
+                "/calculate/?" + '&'.join(f"{r}={n}" for (r,n) in clean_request)
+            )
+
 class CalculatePage:
     @cherrypy.expose
     def index(self, **kwargs):
-        # clean empty form entries from url does not work
-        #clean_request = { (r,n) for (r,n) in kwargs.items() if n }
-        #if len(clean_request) != len(kwargs):
-        #    raise cherrypy.HTTPRedirect(
-        #        "/calculate/?" + '&'.join(f"{r}={n}" for (r,n) in clean_request)
-        #    )
-
         menu = {}
         for (recipe_name, n) in kwargs.items():
             if n:
@@ -134,5 +137,6 @@ if __name__ == '__main__':
         }
     }
     root = RecipePage()
+    root.request = RequestPage()
     root.calculate = CalculatePage()
     cherrypy.quickstart(root, config = conf)
