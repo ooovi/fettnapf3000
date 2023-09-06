@@ -5,6 +5,18 @@ import markdown
 import pymdownx
 import planner
 import parser
+from random import choice
+
+def randomoji():
+    return choice(["&#127814;",
+                   "&#127798;",
+                   "&#127826;",
+                   "&#127825;",
+                   "&#127853;",
+                   "&#129373;",
+                   "&#129361;",
+                   "&#129473;",
+                   "&#127789;"])
 
 class RecipePage:
     @cherrypy.expose
@@ -22,7 +34,7 @@ class RecipePage:
           </head>
           <body>
            <center><p style="font-size:70px;">
-            &#127814;
+            {randomoji()}
            </p></center>
            <strong>Stelle Anzahl Portionen pro Gericht ein und drück auf Kalkulation!</strong>
            <br> Speicher danach den Link, um deine Kalkulation zu teilen.<br><br>
@@ -53,15 +65,21 @@ class RecipePage:
 class CalculatePage:
     @cherrypy.expose
     def index(self, **kwargs):
+        # clean empty form entries from url
+        clean_request = { (r,n) for (r,n) in kwargs.items() if n }
+        if len(clean_request) != len(kwargs):
+            raise cherrypy.HTTPRedirect(
+                "/calculate/?" + '&'.join(f"{r}={n}" for (r,n) in clean_request)
+            )
+
         menu = {}
-        for (recipe_name, n) in kwargs.items():
-            if n:
-                recipe = parser.parse_recipe("../recipes/" + recipe_name)
-                n_servings = int(n)
-                if "Rezepte" in menu:
-                     menu["Rezepte"].append((recipe, n_servings))
-                else:
-                     menu["Rezepte"] = [(recipe, n_servings)]
+        for (recipe_name, n) in clean_request:
+            recipe = parser.parse_recipe("../recipes/" + recipe_name)
+            n_servings = int(n)
+            if "Rezepte" in menu:
+                 menu["Rezepte"].append((recipe, n_servings))
+            else:
+                 menu["Rezepte"] = [(recipe, n_servings)]
             
         plan = planner.plan(menu)
 
@@ -81,15 +99,15 @@ class CalculatePage:
               >
               <title>fettnapf3000 Power Kalkulator!</title>
              </head>
-           <center><p style="font-size:70px;">
-            <a href="/">&#127814;</a>
-           </p></center>
-             <body>
-              {plan_html}
-             </body>
+              <body>
+               <center><p style="font-size:70px;">
+                <a href="/">
+                {randomoji()}
+                </a>
+               </p></center>
+               {plan_html}
+              </body>
             </html>"""
-
-
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
