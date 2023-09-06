@@ -15,4 +15,4 @@
 blend everything but the parsley. chop parsley and stir in.
 
 ### Material
-blender
+stabmixer

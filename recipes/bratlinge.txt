@@ -13,5 +13,5 @@
 0.01 pfeffer
 
 ### Material
-blender
-grater
+stabmixer
+reibe

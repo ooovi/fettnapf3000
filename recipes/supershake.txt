@@ -10,4 +10,4 @@
 blend all Zutaten. enjoy.
 
 ### Material
-blender
+stabmixer
