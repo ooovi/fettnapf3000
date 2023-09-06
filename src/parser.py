@@ -105,17 +105,20 @@ category = Group(Suppress("### ") + word("name") + OneOrMore(ingredient + Option
 menu_parser = OneOrMore(category)
 
 # returns a list of tuples (category, recipe filename, number of servings)
-def parse_menu(path) -> list[tuple[str, str, float]]:
+def parse_menu_file(path) -> list[tuple[str, str, float]]:
     with open(path, 'r') as file:
         menu_string = file.read()
-        try:
-            parsed_menu = menu_parser.parseString(menu_string)
-        except ParseException as err:
-            raise ParseError(f"Menu not formatted correctly, got error {err}")
-        menu = []
-        for cat in parsed_menu:
-            cat_name = cat.name[0]
-            for (recipe_name, servings) in cat.recipes:
-                menu.append((cat_name, recipe_name, servings))
-        return menu
+        return parse_menu(menu_string)
+
+def parse_menu(menu_string: str) -> list[tuple[str, str, float]]:
+    try:
+        parsed_menu = menu_parser.parseString(menu_string)
+    except ParseException as err:
+        raise ParseError(f"Menu not formatted correctly, got error {err}")
+    menu = []
+    for cat in parsed_menu:
+        cat_name = cat.name[0]
+        for (recipe_name, servings) in cat.recipes:
+            menu.append((cat_name, recipe_name, servings))
+    return menu
 

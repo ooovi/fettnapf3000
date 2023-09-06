@@ -39,6 +39,31 @@ def viewport():
     return """<meta name="viewport" content="width=device-width, initial-scale=1.0">"""
 
 
+def plan_menu(menu):
+    plan = planner.plan(menu)
+
+    extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
+    plan_html = markdown.markdown(plan,
+        extensions=['tables','pymdownx.tasklist'],
+        extension_configs=extension_configs)
+
+    return f"""<html>
+        {viewport()}
+        <head>
+         <link href="../static/css/menu.css" rel="stylesheet">
+         {favicon()}
+         <title>fettnapf3000 Power Kalkulator!</title>
+        </head>
+         <body>
+          <center style="margin-bottom:40px;"><p style="font-size:70px;">
+           <a href="/" style="text-decoration: none">
+            {randomoji()}
+           </a>
+          </p></center>
+          {plan_html}
+         </body>
+       </html>"""
+
 class RecipePage:
     @cherrypy.expose
     def index(self):
@@ -50,9 +75,12 @@ class RecipePage:
                <title>fettnapf3000 Power Kalkulator!</title>
              </head>
              <body>
-              <center style="margin-bottom:40px;"><p style="font-size:70px;">
+              <center style="margin-bottom:40px;"><div style="font-size:70px;">
+              <a href="/menu" style="text-decoration: none">
                {randomoji()}
-              </p></center>
+              </a>
+              </div>
+              </center>
               <strong>Stelle Anzahl Portionen pro Gericht ein und drück auf Kalkulation!</strong>
               <br> Speicher danach den Link, um deine Kalkulation zu teilen.<br><br>
               {self.create_recipes_form()}
@@ -79,15 +107,82 @@ class RecipePage:
         html_string += "<input type=\"submit\" value=\"Kalkulation\"></form>"
         return html_string
 
+class MenuPage:
+    @cherrypy.expose
+    def index(self):
+        recipes = os.listdir("../recipes")
+        recipes.sort()
+        recipe_list = "<br>".join(os.path.splitext(recipe)[0].capitalize() for recipe in recipes)
+
+        return f"""<html>
+            {viewport()}
+            <head>
+             <link href="../static/css/menu.css" rel="stylesheet">
+             {favicon()}
+             <title>fettnapf3000 Power Kalkulator!</title>
+            </head>
+             <body>
+              <center style="margin-bottom:40px;"><div style="font-size:70px;">
+               <a href="/" style="text-decoration: none">
+                {randomoji()}
+               </a>
+               </div>
+              </center>
+               Gib ein Menü in diesem Format an:
+               <div class="box" style="border: 2px solid #f2f2f2; margin: 20 0 20 0"><pre>
+### Montag
+1 Supershake
+
+### Dienstag
+1 Supershake
+
+### Rest der Woche
+100 Kaffe
+100 Pumpkinsnails
+               </pre></div>
+               Die Namen der Gerichte müssen genau der Liste unten entsprechen!<br>
+               Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen.
+               <form action="/calculate_menu" method="get" >
+                <textarea name="menu"></textarea><br>
+                <center>
+                <input type="submit" value="Kalkulation">
+                </center>
+               </form>
+             <h1>Rezepte</h1>
+             {recipe_list}
+             </body>
+            <center>
+            <footer style="margin-top:80px">
+              <p>made with &#127814; by team geil</p>
+              <p>contribute on <a href="https://github.com/ooovi/fettnapf3000">github</a></p>
+            </footer>
+            </center>
+           </html>"""
+
+class CalculateMenuPage:
+    @cherrypy.expose
+    def index(self, **kwargs):
+        menu_md = kwargs.get("menu")
+        menu_list = parser.parse_menu(menu_md)
+        menu = {}
+        for (category, recipe_name, n_servings) in menu_list:
+             recipe_file = sys.path[0] + "/../recipes/" + recipe_name + ".txt"
+             recipe = parser.parse_recipe(recipe_file)
+             if category in menu:
+                 menu[category].append((recipe, n_servings))
+             else:
+                 menu[category] = [(recipe, n_servings)]
+        return plan_menu(menu)
+        
+
 class RequestPage:
     @cherrypy.expose
     def index(self, **kwargs):
         # clean empty form entries from url
         clean_request = { (r,n) for (r,n) in kwargs.items() if n }
-        if len(clean_request) != len(kwargs):
-            raise cherrypy.HTTPRedirect(
-                "/calculate/?" + '&'.join(f"{urllib.parse.quote(r)}={n}" for (r,n) in clean_request)
-            )
+        raise cherrypy.HTTPRedirect(
+            "/calculate/?" + '&'.join(f"{urllib.parse.quote(r)}={n}" for (r,n) in clean_request)
+        )
 
 class CalculatePage:
     @cherrypy.expose
@@ -104,30 +199,8 @@ class CalculatePage:
                      menu["Rezepte"].append((recipe, n_servings))
                 else:
                      menu["Rezepte"] = [(recipe, n_servings)]
-            
-        plan = planner.plan(menu)
 
-        extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
-        plan_html = markdown.markdown(plan,
-            extensions=['tables','pymdownx.tasklist'],
-            extension_configs=extension_configs)
-
-        return f"""<html>
-            {viewport()}
-            <head>
-             <link href="../static/css/calculate.css" rel="stylesheet">
-             {favicon()}
-             <title>fettnapf3000 Power Kalkulator!</title>
-            </head>
-             <body>
-              <center style="margin-bottom:40px;"><p style="font-size:70px;">
-               <a href="/" style="text-decoration: none">
-                {randomoji()}
-               </a>
-              </p></center>
-              {plan_html}
-             </body>
-           </html>"""
+        return plan_menu(menu)
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
@@ -148,5 +221,7 @@ if __name__ == '__main__':
     }
     root = RecipePage()
     root.request = RequestPage()
+    root.menu = MenuPage()
+    root.calculate_menu = CalculateMenuPage()
     root.calculate = CalculatePage()
     cherrypy.quickstart(root, config = conf)

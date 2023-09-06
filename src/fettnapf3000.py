@@ -7,7 +7,7 @@ def main():
     menu_file = sys.argv[1]
 
     try:
-       menu_list = parse_menu(menu_file)
+       menu_list = parse_menu_file(menu_file)
 
        # make a menu dict, mapping categories to lists of recipes and n_servings
        menu = {}
