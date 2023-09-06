@@ -8,7 +8,7 @@ class Recipe:
         self.ingredients = ingredients
         self.instructions = instructions
         self.materials = materials
-        self.total_weight = sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in ingredients])
+        self.total_weight = round(sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in ingredients]),3)
 
     def scaled_ingredients(self, n_servings: float):
         scaled = []
@@ -30,7 +30,7 @@ def recipe_string(recipe, n_servings):
         # ingredients table
         recipe_str += "| kg | Zutat | *kg pro Portion* |\n"
         recipe_str += "|:----|:-------------|:---------------:|\n"
-        recipe_str += "\n".join([f"| {amount:g} | {ingredient.capitalize()} |  *{amount/n_servings:g}* |"\
+        recipe_str += "\n".join([f"| {round(amount,3):g} | {ingredient.capitalize()} |  *{round(amount/n_servings,3):g}* |"\
                                   for (ingredient, amount) in scaled_ingredients.items()])
         recipe_str += "\n"
         

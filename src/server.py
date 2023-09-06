@@ -19,6 +19,12 @@ def randomoji():
                    "&#129473;",
                    "&#129375;",
                    "&#127817;",
+                   "&#127849;",
+                   "&#127820;",
+                   "&#127805;",
+                   "&#127852;",
+                   "&#127815;",
+                   "&#127822;",
                    "&#127789;"])
 
 def favicon():
@@ -44,7 +50,7 @@ class RecipePage:
                <title>fettnapf3000 Power Kalkulator!</title>
              </head>
              <body>
-              <center><p style="font-size:70px;">
+              <center style="margin-bottom:40px;"><p style="font-size:70px;">
                {randomoji()}
               </p></center>
               <strong>Stelle Anzahl Portionen pro Gericht ein und drück auf Kalkulation!</strong>
@@ -86,6 +92,9 @@ class RequestPage:
 class CalculatePage:
     @cherrypy.expose
     def index(self, **kwargs):
+        if not kwargs:
+            raise cherrypy.HTTPRedirect("/")
+
         menu = {}
         for (recipe_name, n) in kwargs.items():
             if n:
@@ -111,8 +120,8 @@ class CalculatePage:
              <title>fettnapf3000 Power Kalkulator!</title>
             </head>
              <body>
-              <center><p style="font-size:70px;">
-               <a href="/">
+              <center style="margin-bottom:40px;"><p style="font-size:70px;">
+               <a href="/" style="text-decoration: none">
                 {randomoji()}
                </a>
               </p></center>
