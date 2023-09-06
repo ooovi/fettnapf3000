@@ -65,21 +65,22 @@ class RecipePage:
 class CalculatePage:
     @cherrypy.expose
     def index(self, **kwargs):
-        # clean empty form entries from url
-        clean_request = { (r,n) for (r,n) in kwargs.items() if n }
-        if len(clean_request) != len(kwargs):
-            raise cherrypy.HTTPRedirect(
-                "/calculate/?" + '&'.join(f"{r}={n}" for (r,n) in clean_request)
-            )
+        # clean empty form entries from url does not work
+        #clean_request = { (r,n) for (r,n) in kwargs.items() if n }
+        #if len(clean_request) != len(kwargs):
+        #    raise cherrypy.HTTPRedirect(
+        #        "/calculate/?" + '&'.join(f"{r}={n}" for (r,n) in clean_request)
+        #    )
 
         menu = {}
-        for (recipe_name, n) in clean_request:
-            recipe = parser.parse_recipe("../recipes/" + recipe_name)
-            n_servings = int(n)
-            if "Rezepte" in menu:
-                 menu["Rezepte"].append((recipe, n_servings))
-            else:
-                 menu["Rezepte"] = [(recipe, n_servings)]
+        for (recipe_name, n) in kwargs.items():
+            if n:
+                recipe = parser.parse_recipe("../recipes/" + recipe_name)
+                n_servings = int(n)
+                if "Rezepte" in menu:
+                     menu["Rezepte"].append((recipe, n_servings))
+                else:
+                     menu["Rezepte"] = [(recipe, n_servings)]
             
         plan = planner.plan(menu)
 
