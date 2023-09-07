@@ -54,7 +54,7 @@ table th {
 
 @media only screen and (max-device-width: 480px) {
   .task-list-item {
-    font-size: 2em
+    margin: 0 5em 0.25em -2em;
   }
 
   .task-list-item input[type="checkbox"] {

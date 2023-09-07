@@ -44,7 +44,7 @@ input[type="submit"] {
 
 @media only screen and (max-device-width: 480px) {
   form {
-    font-size: 2em
+    font-size: 1.5em
   }
 
   label {
