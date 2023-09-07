@@ -26,10 +26,10 @@ form p {
 label {
   flex: 1;
   max-width: 66.666%;
+  overflow-wrap: break-word;
 }
 
 input[type="number"] {
-  flex: 1;
   max-width: 33.333%;
   margin: 0;
 }

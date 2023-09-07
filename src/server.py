@@ -58,6 +58,7 @@ def plan_menu(menu):
     <!DOCTYPE html>
     <html lang="de">
         <head>
+         <meta charset="UTF-8">
          {viewport()}
          <link href="../static/css/calculate.css" rel="stylesheet">
          {favicon()}
@@ -76,6 +77,7 @@ class RecipePage:
         <!DOCTYPE html>
         <html lang="de">
               <head>
+               <meta charset="UTF-8">
                {viewport()}
                <link href="./static/css/recipes.css" rel="stylesheet">
                {favicon()}
@@ -115,6 +117,7 @@ class MenuPage:
         <!DOCTYPE html>
         <html lang="de">
             <head>
+             <meta charset="UTF-8">
              {viewport()}
              <link href="../static/css/menu.css" rel="stylesheet">
              {favicon()}
@@ -138,7 +141,7 @@ class MenuPage:
               Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen.
               <form action="/calculate_menu" method="get" >
                <textarea name="menu"></textarea><br>
-               <p><input type="submit" value="Kalkulation"></p></form>
+               <p><input type="submit" value="Kalkulation"></p>
               </form>
              <h1>Rezepte</h1>
              {recipe_list}
@@ -163,6 +166,7 @@ class ErrorMenuPage:
         <!DOCTYPE html>
         <html lang="de">
             <head>
+             <meta charset="UTF-8">
              {viewport()}
              <link href="../../static/css/menu.css" rel="stylesheet">
              {favicon()}
