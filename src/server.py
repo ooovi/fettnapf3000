@@ -8,12 +8,10 @@ import parser
 from random import choice
 import urllib.parse
 
-footer = """<center>
-            <footer style="margin-top: 5em">
+footer = """<footer style="margin-top: 5em; text-align: center;">
               <p>made with &#127814; by team geil</p>
               <p>contribute on <a href="https://github.com/ooovi/fettnapf3000">github</a></p>
-            </footer>
-            </center>"""
+            </footer>"""
 
 def randomoji():
     return choice(["&#127814;",
@@ -36,19 +34,13 @@ def randomoji():
 
 def randomoji_link(ref):
     return f"""
-          <center style="margin-bottom:3em;">
-           <p style="font-size:5em;">
+           <p style="font-size:5em; text-align:center;">
             <a href="{ref}" style="text-decoration: none">
              {randomoji()}
-            </a></p></center>"""
+            </a></p>"""
 
 def favicon():
-   return """<link rel="icon"
-                  href="data:image/svg+xml,
-                        <svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22>
-                         <text y=%22.9em%22 font-size=%2290%22>&#127814;</text>
-                        </svg>"
-              >"""
+   return """<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#127814;</text></svg>">"""
 
 def viewport():
     return """<meta name="viewport" content="width=device-width, initial-scale=1.0">"""
@@ -62,9 +54,11 @@ def plan_menu(menu):
         extensions=['tables','pymdownx.tasklist'],
         extension_configs=extension_configs)
 
-    return f"""<html>
-        {viewport()}
+    return f"""
+    <!DOCTYPE html>
+    <html lang="de">
         <head>
+         {viewport()}
          <link href="../static/css/calculate.css" rel="stylesheet">
          {favicon()}
          <title>fettnapf3000 Power Kalkulator!</title>
@@ -78,9 +72,11 @@ def plan_menu(menu):
 class RecipePage:
     @cherrypy.expose
     def index(self):
-        return f"""<html>
-              {viewport()}
+        return f"""
+        <!DOCTYPE html>
+        <html lang="de">
               <head>
+               {viewport()}
                <link href="./static/css/recipes.css" rel="stylesheet">
                {favicon()}
                <title>fettnapf3000 Power Kalkulator!</title>
@@ -90,8 +86,8 @@ class RecipePage:
               <strong>Stelle Anzahl Portionen pro Gericht ein und drück auf Kalkulation!</strong>
               <br> Speicher danach den Link, um deine Kalkulation zu teilen.<br><br>
               {self.create_recipes_form()}
+              {footer}
             </body>
-            {footer}
             </html>"""
 
     def create_recipes_form(self):
@@ -103,9 +99,9 @@ class RecipePage:
                 <label for="{recipe}">
                  {os.path.splitext(recipe)[0].capitalize().replace("_"," ")}:&ensp;
                 </label>
-                <input type="number" name="{recipe}" size="6"><br>
+                <input type="number" name="{recipe}" id="{recipe}"><br>
                 </p>"""
-        html_string += """<p><input type="submit" value="Kalkulation"></form></p>"""
+        html_string += """<p><input type="submit" value="Kalkulation"></p></form>"""
         return html_string
 
 class MenuPage:
@@ -115,9 +111,11 @@ class MenuPage:
         recipes.sort()
         recipe_list = "<br>".join(os.path.splitext(recipe)[0].capitalize() for recipe in recipes)
 
-        return f"""<html>
-            {viewport()}
+        return f"""
+        <!DOCTYPE html>
+        <html lang="de">
             <head>
+             {viewport()}
              <link href="../static/css/menu.css" rel="stylesheet">
              {favicon()}
              <title>fettnapf3000 Power Kalkulator!</title>
@@ -140,14 +138,12 @@ class MenuPage:
               Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen.
               <form action="/calculate_menu" method="get" >
                <textarea name="menu"></textarea><br>
-               <center>
-               <input type="submit" value="Kalkulation">
-               </center>
+               <p><input type="submit" value="Kalkulation"></p></form>
               </form>
              <h1>Rezepte</h1>
              {recipe_list}
+             {footer}
              </body>
-            {footer}
            </html>"""
 
 class ErrorMenuPage:
@@ -163,22 +159,21 @@ class ErrorMenuPage:
                         Geh zurück und schau es dir nochmal an.
                      """
 
-        return f"""<html>
-            {viewport()}
+        return f"""
+        <!DOCTYPE html>
+        <html lang="de">
             <head>
+             {viewport()}
              <link href="../../static/css/menu.css" rel="stylesheet">
              {favicon()}
              <title>fettnapf3000 Power Kalkulator!</title>
             </head>
              <body>
-             <center style="margin-bottom:4em;">
-              <p style="font-size:7em;">
+              <p style="font-size:7em; text-align:center;">
                <a href="#" onclick="history.back()" style="text-decoration: none">
                {randomoji()}
-               </a></p></center>
-              <center>
+               </a></p>
                {error}
-              </center>
              </body>
             </html>"""
 

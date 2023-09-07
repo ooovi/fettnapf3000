@@ -11,7 +11,7 @@ body {
  margin-right: auto;
  margin-left: auto;
  background-color: white;
- border: 4em solid white;
+ padding: 4em;
 }
 
 textarea {
@@ -27,12 +27,18 @@ input[type="submit"] {
   padding: 0.6em 1em;
 }
 
+form p {
+  display: flex;
+  align-items: center;
+}
+
 h1 {
  border-top: 2px solid #f2f2f2;
  padding-top: 3em;
 }
 
 div {
-  border: 2px solid #f2f2f2;
+  background-color: #f2f2f2;
   margin: 2em 0 2em 0;
+  padding: 2em
 }

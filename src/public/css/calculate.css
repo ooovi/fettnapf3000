@@ -11,7 +11,7 @@ body {
   margin-right: auto;
   margin-left: auto;
   background-color: white;
-  border: 4em solid white;
+  padding: 4em;
 }
 
 h1 {
@@ -52,7 +52,7 @@ table th {
   list-style-type: none;
 }
 
-@media only screen and (max-device-width: 480px) {
+@media only screen and (max-width: 480px) {
   .task-list-item {
     margin: 0 5em 0.25em -2em;
   }
