@@ -8,6 +8,13 @@ import parser
 from random import choice
 import urllib.parse
 
+footer = """<center>
+            <footer style="margin-top: 5em">
+              <p>made with &#127814; by team geil</p>
+              <p>contribute on <a href="https://github.com/ooovi/fettnapf3000">github</a></p>
+            </footer>
+            </center>"""
+
 def randomoji():
     return choice(["&#127814;",
                    "&#127798;",
@@ -26,6 +33,14 @@ def randomoji():
                    "&#127815;",
                    "&#127822;",
                    "&#127789;"])
+
+def randomoji_link(ref):
+    return f"""
+          <center style="margin-bottom:3em;">
+           <p style="font-size:5em;">
+            <a href="{ref}" style="text-decoration: none">
+             {randomoji()}
+            </a></p></center>"""
 
 def favicon():
    return """<link rel="icon"
@@ -50,16 +65,12 @@ def plan_menu(menu):
     return f"""<html>
         {viewport()}
         <head>
-         <link href="../static/css/menu.css" rel="stylesheet">
+         <link href="../static/css/calculate.css" rel="stylesheet">
          {favicon()}
          <title>fettnapf3000 Power Kalkulator!</title>
         </head>
          <body>
-          <center style="margin-bottom:40px;"><p style="font-size:70px;">
-           <a href="/" style="text-decoration: none">
-            {randomoji()}
-           </a>
-          </p></center>
+          {randomoji_link("/")}
           {plan_html}
          </body>
        </html>"""
@@ -75,22 +86,12 @@ class RecipePage:
                <title>fettnapf3000 Power Kalkulator!</title>
              </head>
              <body>
-              <center style="margin-bottom:40px;"><div style="font-size:70px;">
-              <a href="/menu" style="text-decoration: none">
-               {randomoji()}
-              </a>
-              </div>
-              </center>
+              {randomoji_link("/menu")}
               <strong>Stelle Anzahl Portionen pro Gericht ein und drück auf Kalkulation!</strong>
               <br> Speicher danach den Link, um deine Kalkulation zu teilen.<br><br>
               {self.create_recipes_form()}
             </body>
-            <center>
-            <footer>
-              <p>made with &#127814; by team geil</p>
-              <p>contribute on <a href="https://github.com/ooovi/fettnapf3000">github</a></p>
-            </footer>
-            </center>
+            {footer}
             </html>"""
 
     def create_recipes_form(self):
@@ -104,7 +105,7 @@ class RecipePage:
                 </label>
                 <input type="number" name="{recipe}" size="6"><br>
                 </p>"""
-        html_string += "<input type=\"submit\" value=\"Kalkulation\"></form>"
+        html_string += """<p><input type="submit" value="Kalkulation"></form></p>"""
         return html_string
 
 class MenuPage:
@@ -122,14 +123,9 @@ class MenuPage:
              <title>fettnapf3000 Power Kalkulator!</title>
             </head>
              <body>
-              <center style="margin-bottom:40px;"><div style="font-size:70px;">
-               <a href="/" style="text-decoration: none">
-                {randomoji()}
-               </a>
-               </div>
-              </center>
-               Gib ein Menü in diesem Format an:
-               <div class="box" style="border: 2px solid #f2f2f2; margin: 20 0 20 0"><pre>
+              {randomoji_link("/")}
+              <strong>Gib ein Menü in diesem Format an:</strong>
+              <div><pre>
 ### Montag
 1 Supershake
 
@@ -139,41 +135,75 @@ class MenuPage:
 ### Rest der Woche
 100 Kaffe
 100 Pumpkinsnails
-               </pre></div>
-               Die Namen der Gerichte müssen genau der Liste unten entsprechen!<br>
-               Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen.
-               <form action="/calculate_menu" method="get" >
-                <textarea name="menu"></textarea><br>
-                <center>
-                <input type="submit" value="Kalkulation">
-                </center>
-               </form>
+              </pre></div>
+              Die Namen der Gerichte müssen genau der Liste unten entsprechen!<br>
+              Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen.
+              <form action="/calculate_menu" method="get" >
+               <textarea name="menu"></textarea><br>
+               <center>
+               <input type="submit" value="Kalkulation">
+               </center>
+              </form>
              <h1>Rezepte</h1>
              {recipe_list}
              </body>
-            <center>
-            <footer style="margin-top:80px">
-              <p>made with &#127814; by team geil</p>
-              <p>contribute on <a href="https://github.com/ooovi/fettnapf3000">github</a></p>
-            </footer>
-            </center>
+            {footer}
            </html>"""
+
+class ErrorMenuPage:
+    @cherrypy.expose
+    def index(self, **kwargs):
+        if "format" in kwargs:
+            error = f"""<strong>Dein Menü ist nicht im richtigen Format!</strong><br>
+                        Geh zurück und schau es dir nochmal an. Der Fehler:<br>
+                        <div>{kwargs.get("format")}</div>
+                     """
+        if "recipe" in kwargs:
+            error = f"""<strong>Das Rezept {kwargs.get("recipe")} steht nicht in der Liste!</strong><br>
+                        Geh zurück und schau es dir nochmal an.
+                     """
+
+        return f"""<html>
+            {viewport()}
+            <head>
+             <link href="../../static/css/menu.css" rel="stylesheet">
+             {favicon()}
+             <title>fettnapf3000 Power Kalkulator!</title>
+            </head>
+             <body>
+             <center style="margin-bottom:4em;">
+              <p style="font-size:7em;">
+               <a href="#" onclick="history.back()" style="text-decoration: none">
+               {randomoji()}
+               </a></p></center>
+              <center>
+               {error}
+              </center>
+             </body>
+            </html>"""
 
 class CalculateMenuPage:
     @cherrypy.expose
     def index(self, **kwargs):
         menu_md = kwargs.get("menu")
-        menu_list = parser.parse_menu(menu_md)
+        try:
+            menu_list = parser.parse_menu(menu_md)
+        except parser.ParseError as e:
+            raise cherrypy.HTTPRedirect(f"/menu/error/?{urllib.parse.urlencode({'format':e})}")
         menu = {}
         for (category, recipe_name, n_servings) in menu_list:
              recipe_file = sys.path[0] + "/../recipes/" + recipe_name + ".txt"
-             recipe = parser.parse_recipe(recipe_file)
+             try:
+                 recipe = parser.parse_recipe(recipe_file)
+             except IOError as e:
+                 raise cherrypy.HTTPRedirect(f"/menu/error/?recipe={recipe_name.capitalize()}")
              if category in menu:
                  menu[category].append((recipe, n_servings))
              else:
                  menu[category] = [(recipe, n_servings)]
         return plan_menu(menu)
-        
+
+
 
 class RequestPage:
     @cherrypy.expose
@@ -222,6 +252,7 @@ if __name__ == '__main__':
     root = RecipePage()
     root.request = RequestPage()
     root.menu = MenuPage()
+    root.menu.error = ErrorMenuPage()
     root.calculate_menu = CalculateMenuPage()
     root.calculate = CalculatePage()
     cherrypy.quickstart(root, config = conf)

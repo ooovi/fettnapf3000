@@ -74,7 +74,7 @@ def build_recipe(recipe_string):
     try:
         parsed_recipe = recipe_parser.parseString(recipe_string)
     except ParseException as err:
-        raise ParseError(f"Recipe {recipe_string} not formatted correctly, got error\n {err}")
+        raise ParseError(f"Recipe {recipe_string} not formatted correctly: {err}")
         
     name = parsed_recipe.name[0]
     servings = parsed_recipe.servings[0]
@@ -114,7 +114,7 @@ def parse_menu(menu_string: str) -> list[tuple[str, str, float]]:
     try:
         parsed_menu = menu_parser.parseString(menu_string)
     except ParseException as err:
-        raise ParseError(f"Menu not formatted correctly, got error {err}")
+        raise ParseError(f"Menu not formatted correctly{err}")
     menu = []
     for cat in parsed_menu:
         cat_name = cat.name[0]

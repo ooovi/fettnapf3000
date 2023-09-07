@@ -1,27 +1,58 @@
-*{ font-family: monospace, "Lucida Console"; }
+*{
+  font-family: monospace;
+}
+
 html {
   background-color: #f2f2f2;
 }
-body { 
- max-width: 400px;
- margin-right:  auto;
- margin-left:  auto;
+
+body {
+ max-width: 33em;
+ margin-right: auto;
+ margin-left: auto;
  background-color: white;
- border: 50px solid white;
+ border: 4em solid white;
 }
-form  {
-    font-size: 15pt;
-    display: table; 
-    margin-left: auto;
-    margin-right: auto;
+
+form {
+  font-size: 1.5em;
 }
-p     { display: table-row;  }
-label { display: table-cell; }
-input { display: table-cell; }
-input[type="number"] { height:28px; }
+
+form p {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+label {
+  flex: 1;
+  max-width: 66.666%;
+}
+
+input[type="number"] {
+  flex: 1;
+  max-width: 33.333%;
+  margin: 0;
+}
+
 input[type="submit"] {
-    margin: 30 0 80 60;
-    border: none;
-    font-size: 24px;
-    padding: 14px 32px;
+  margin: 3em auto 3em auto;
+  border: none;
+  font-size: 1.5em;
+  padding: 0.6em 1em;
+}
+
+@media only screen and (max-device-width: 480px) {
+  form {
+    font-size: 2em
+  }
+
+  label {
+    max-width: 80%;
+  }
+
+  input[type="number"] {
+    height: 3em;
+    max-width: 20%;
+  }
 }
