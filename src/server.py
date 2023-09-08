@@ -86,7 +86,8 @@ class RecipePage:
              <body>
               {randomoji_link("/menu")}
               <strong>Stelle Anzahl Portionen pro Gericht ein und drück auf Kalkulation!</strong>
-              <br> Speicher danach den Link, um deine Kalkulation zu teilen.<br><br>
+              <br> Speicher danach den Link, um deine Kalkulation zu teilen.
+              <br> Falls du viele verschiedene Gerichte planst könnte dich unser <a href="./menu">Menü-Planer</a> interessieren!<br><br>
               {self.create_recipes_form()}
               {footer}
             </body>
