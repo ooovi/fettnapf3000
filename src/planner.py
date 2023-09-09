@@ -101,7 +101,7 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
                     cat_recipes.append(recipe_string(recipe, n_servings))
 
         # pagebreak after each category
-        recipe_list += ("---").join(cat_recipes) + md_pagebreak
+        recipe_list += ("---").join(cat_recipes)
 
     # make a total materials list for the overview
     materials_list = "" if materials == set() else "\n## Spezialequipment\n\n" +\

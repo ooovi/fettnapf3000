@@ -1,4 +1,4 @@
-## Britfast (berechnet mit 2 kleine Würste, 2 K-Rösti pro Person – dann ist noch Platz für Fleischsalat und Müsli im Bauch :) )
+## Britfast
 
 10 Portionen
 
@@ -10,3 +10,6 @@
 1 tomaten
 1 zwiebeln
 1 tk-rösti
+
+### Anleitung
+berechnet mit 2 kleine Würste, 2 K-Rösti pro Person – dann ist noch Platz für Fleischsalat und Müsli im Bauch :)

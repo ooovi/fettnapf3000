@@ -64,10 +64,15 @@ def plan_menu(menu):
          {favicon()}
          <title>fettnapf3000 Power Kalkulator!</title>
         </head>
-         <body>
-          {randomoji_link("/")}
-          {plan_html}
-         </body>
+        <body>
+         {randomoji_link("/")}
+         {plan_html}
+         <hr>
+         <footer style="margin-top: 5em; text-align: center;">
+           <p>Rezepte können Spuren von Tipp- und Denkfehlern enthalten.</p>
+           <p>Wenn du welche findest, <a href="https://github.com/ooovi/fettnapf3000">sag Bescheid</a>!</p>
+         </footer>
+        </body>
        </html>"""
 
 class RecipePage:
