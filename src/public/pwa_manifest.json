@@ -4,7 +4,7 @@
   "icons": [
     {
       "src": "favicon.png",
-      "sizes": "64x64 48x48 72x72 96x96 128x128 144x144 180x180 192x192 257x257",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
           }
