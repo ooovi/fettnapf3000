@@ -4,9 +4,10 @@
   "icons": [
     {
       "src": "favicon.svg",
-      "sizes": "64x64",
-      "type": "image/svg+xml"
-    }
+      "sizes": "64x64 48x48 72x72 96x96 128x128 144x144 180x180 192x192 257x257",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+          }
   ],
   "start_url": "../",
   "display": "standalone"
