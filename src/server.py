@@ -61,6 +61,7 @@ def plan_menu(menu):
          <meta charset="UTF-8">
          {viewport()}
          <link href="../static/css/calculate.css" rel="stylesheet">
+         <link href="../static/pwa_manifest.json" rel="manifest">
          {favicon()}
          <title>fettnapf3000 Power Kalkulator!</title>
         </head>
@@ -85,6 +86,7 @@ class RecipePage:
                <meta charset="UTF-8">
                {viewport()}
                <link href="./static/css/recipes.css" rel="stylesheet">
+               <link href="../static/pwa_manifest.json" rel="manifest">
                {favicon()}
                <title>fettnapf3000 Power Kalkulator!</title>
              </head>
@@ -126,6 +128,7 @@ class MenuPage:
              <meta charset="UTF-8">
              {viewport()}
              <link href="../static/css/menu.css" rel="stylesheet">
+             <link href="../static/pwa_manifest.json" rel="manifest">
              {favicon()}
              <title>fettnapf3000 Power Kalkulator!</title>
             </head>
@@ -175,6 +178,7 @@ class ErrorMenuPage:
              <meta charset="UTF-8">
              {viewport()}
              <link href="../../static/css/menu.css" rel="stylesheet">
+             <link href="../static/pwa_manifest.json" rel="manifest">
              {favicon()}
              <title>fettnapf3000 Power Kalkulator!</title>
             </head>
