@@ -1,17 +1,13 @@
 {
   "lang": "de",
-  "name": "Fettnapf3000 Power Kalkulator",
+  "name": "Fettnapf3000",
   "icons": [
     {
       "src": "favicon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-          },
-    {
-    "src": "favicon.svg",
-    "sizes": "any"
-  }
+    }
   ],
   "start_url": "../",
   "display": "standalone"
