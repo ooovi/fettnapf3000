@@ -136,7 +136,7 @@ def shopping_list(total_ingredients: Counter):
         for (ingredient, amount) in cat_dict[cat]:
             md += f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()}\n"
             cat_amount += amount
-        md = f"\n### {cat.capitalize()} ({round(cat_amount,3):g} total)\n\n" + md
+        md = f"\n### {cat.capitalize()} ({round(cat_amount,3):g} kg)\n\n" + md
         return md
 
     # print all categories

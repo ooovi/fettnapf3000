@@ -26,7 +26,7 @@ form p {
 label {
   flex: 1;
   max-width: 66.666%;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 input[type="number"] {
