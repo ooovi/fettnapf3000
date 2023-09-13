@@ -66,7 +66,11 @@ def plan_menu(menu):
          <title>fettnapf3000 Power Kalkulator!</title>
         </head>
         <body>
-         {randomoji_link("/")}
+         <p style="font-size:5em; text-align:center;">
+          <a onclick="window.print();" style="text-decoration: none">
+           {randomoji()}
+          </a>
+         </p>
          {plan_html}
          <hr>
          <footer style="margin-top: 5em; text-align: center;">
@@ -93,7 +97,7 @@ class RecipePage:
              <body>
               {randomoji_link("/menu")}
               <strong>Stelle Anzahl Portionen pro Gericht ein und drück auf Kalkulation!</strong>
-              <br> Speicher danach den Link, um deine Kalkulation zu teilen.
+              <br> Speicher danach den Link, um deine Kalkulation zu teilen, oder drucke die Seite aus.
               <br> Falls du viele verschiedene Gerichte planst könnte dich unser <a href="./menu">Menü-Planer</a> interessieren!<br><br>
               {self.create_recipes_form()}
               {footer}
@@ -147,7 +151,7 @@ class MenuPage:
 100 Pumpkinsnails
               </pre></div>
               Die Namen der Gerichte müssen genau der Liste unten entsprechen!<br>
-              Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen.
+              Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen, oder drucke die Seite aus.
               <form action="/calculate_menu" method="get" >
                <textarea name="menu"></textarea><br>
                <p><input type="submit" value="Kalkulation"></p>

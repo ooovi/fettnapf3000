@@ -30,6 +30,7 @@ label {
 }
 
 input[type="number"] {
+  flex: 1;
   max-width: 33.333%;
   margin: 0;
 }
