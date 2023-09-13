@@ -3,10 +3,10 @@
   "name": "Fettnapf3000",
   "icons": [
     {
-      "src": "favicon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
   "start_url": "../",
