@@ -40,7 +40,7 @@ def randomoji_link(ref):
             </a></p>"""
 
 def favicon():
-   return """<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#127814;</text></svg>">"""
+   return """<link rel="icon" href="../static/favicon.ico">"""
 
 def viewport():
     return """<meta name="viewport" content="width=device-width, initial-scale=1.0">"""
