@@ -98,7 +98,8 @@ class RecipePage:
               {randomoji_link("/menu")}
               <strong>Stelle Anzahl Portionen pro Gericht ein und drück auf Kalkulation!</strong>
               <br> Speicher danach den Link, um deine Kalkulation zu teilen, oder drucke die Seite aus.
-              <br> Falls du viele verschiedene Gerichte planst könnte dich unser <a href="./menu">Menü-Planer</a> interessieren!<br><br>
+              <br> Falls du viele verschiedene Gerichte planst könnte dich unser <a href="./menu">Menü-Planer</a> interessieren!
+              <br> Falls du eine Koche organisieren willst, lad dir den <a href="https://food4action.noblogs.org/fettnapf/">Fettnapf</a> runter, das ultimative SoKü-Handbuch unserer Herzen.<br>
               {self.create_recipes_form()}
               {footer}
             </body>

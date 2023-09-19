@@ -164,6 +164,7 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
     text += f"***Portionen insgesamt:*** {total_servings:g}\n\n"
     text += f"***Maximale Portionen pro Rezept:*** {max_servings:g}\n\n"
     text += f"***Gesamtgewicht der Zutaten:*** {total_weight:g} kg \n\n"
+    text += f"***Geschätztes Gesamtvolumen der Zutaten:*** {(round(5*total_weight,0)):g} liter \n\n"
     text += md_pagebreak
     
     # printing two shopping lists cuz it handy
