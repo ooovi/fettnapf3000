@@ -6,12 +6,14 @@ import markdown
 import pymdownx
 import planner
 import parser
+from recipe import Recipe, recipe_string
 from metrodb import metrodb
 from random import choice
 import urllib.parse
 from tinydb import Query
 import json
 import string
+from collections import Counter
 
 def html_body(css, body):
     return f"""<!DOCTYPE html>
@@ -21,7 +23,7 @@ def html_body(css, body):
                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
                  <link href="/static/css/{css}.css" rel="stylesheet">
                  <link href="/static/pwa_manifest.json" rel="manifest">
-                 <link rel="icon" href="/static/favicon.ico">
+                 <link href="/static/favicon.ico" rel="icon">
                  <title>fettnapf3000 Power Kalkulator!</title>
                 </head>
                 <body>
@@ -349,18 +351,14 @@ class AddRecipePage:
         if servings == "":
             return error_page("Bitte gib die Anzahl Portionen an.")
 
-        allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + ".,äöüÄÖÜß ")
+        allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + ".,äöüÄÖÜß !?€\"\'")
         if not set(instructions).issubset(allowed):
             return error_page("Anleitung darf nur Buchstaben, Zahlen, Punkt und Komma enthalten!")
         if not set(materials).issubset(allowed):
             return error_page("Materialliste darf nur Buchstaben, Zahlen, Punkt und Komma enthalten!")
 
-        recipe = f"## {recipe_name.capitalize()}\n"
-        recipe += f"{servings} Portionen\n\n"
-        recipe += "### Zutaten\n"
 
-        ingredient_list = ""
-
+        ingredient_list = []
         for i in range(self.n_ingredients):
             ingredient = kwargs[f"ingredient{i}"]
             if ingredient:
@@ -369,18 +367,15 @@ class AddRecipePage:
                     return error_page(f"Die Zutat {ingredient} hat keine Mengenangabe.")
                 if not set(ingredient).issubset(allowed.union(set("()"))):
                     return error_page(f"Zutaten dürfen nur Buchstaben, Zahlen, Punkt und Komma enthalten, aber du hast {ingredient} gesagt.")
-                ingredient_list += f"{amount} {ingredient}\n"
+                ingredient_list.append((ingredient, float(amount)))
 
         if ingredient_list:
-            recipe += ingredient_list
+            ingredients_counter = [("", Counter({ingredient: amount
+                                                for (ingredient, amount) in ingredient_list}))]
         else:
             return error_page("Dein Rezept hat keine Zutaten.")
 
-        if instructions:
-            recipe += f"\n### Anleitung\n{instructions}\n"
-
-        if materials:
-            recipe += f"\n### Material\n{materials}\n"
+        recipe = Recipe(recipe_name, int(servings), ingredients_counter, instructions, set(materials.split(",")))
 
         user = cherrypy.request.login
         recipe_filename = recipe_name.replace(" ","_")
@@ -389,7 +384,7 @@ class AddRecipePage:
             return error_page(f"Gibt schon ein Rezept für {recipe_name}, nimm einen anderen Namen.")
 
         file = open(recipe_path, "a")
-        file.write(recipe)
+        file.write(recipe_string(recipe))
         file.close()
         
         raise cherrypy.HTTPRedirect("/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} hinzugefügt!"))

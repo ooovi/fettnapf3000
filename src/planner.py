@@ -1,57 +1,7 @@
 from collections import Counter
 from tinydb import Query
 from metrodb import metrodb, cat_sort
-
-class Recipe:
-    def __init__(self, name: str, ingredients: [(str,Counter)], instructions: str, materials: set[str]):
-        self.name = name
-        self.ingredients = ingredients
-        self.instructions = instructions
-        self.materials = materials
-        self.total_weight = round(sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in ingredients]),3)
-
-    def scaled_ingredients(self, n_servings: float):
-        scaled = []
-        for (section, ingredients) in self.ingredients:
-            scaled.append((section, Counter({i : n_servings * ingredients[i] for i in ingredients})))
-        return scaled
-
-# make a nice markdown recipe
-def recipe_string(recipe, n_servings):
-
-    scaled_recipe = recipe.scaled_ingredients(n_servings)
-    
-    # name header
-    recipe_str = f"\n## {recipe.name.capitalize()}\n\n {n_servings:g} Portionen\n\n"
-    
-    for (subsection, scaled_ingredients) in scaled_recipe:
-        if subsection != "":
-            recipe_str += "\n#### " + subsection.capitalize() + "\n"
-        # ingredients table
-        recipe_str += "| kg | Zutat | *kg pro Portion* |\n"
-        recipe_str += "|:----|:-------------|:---------------:|\n"
-        recipe_str += "\n".join([f"| {round(amount,3):g} | {ingredient.capitalize()} |  *{round(amount/n_servings,3):g}* |"\
-                                  for (ingredient, amount) in scaled_ingredients.items()])
-        recipe_str += "\n"
-        
-    recipe_str += f"\nGesamtgewicht: {n_servings * recipe.total_weight:g} kg\n"
-    recipe_str += f"\nGewicht pro Portion: {recipe.total_weight:g} kg\n"
-    recipe_str += "\n\n"
-    
-    # instructions
-    if recipe.instructions != "":
-        recipe_str += "### Anleitung\n\n"
-        recipe_str += f"{recipe.instructions} \n\n"
-        
-    # materials
-    if recipe.materials != set():
-        recipe_str += "### Spezialequipment\n\n"
-        recipe_str += "\n".join(f"{name.capitalize()}" for name in recipe.materials) + "\n\n"
-        
-    recipe_str += "\n\n"
-    
-    return recipe_str
-
+from recipe import Recipe, recipe_string
     
 # given a dict {sections -> (recipe, n_servings)}, compute:
 #   - a menu overview markdown string
@@ -98,7 +48,7 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
 
                 # collect recipe string
                 if n_servings != 0 and recipe.name != "misc":
-                    cat_recipes.append(recipe_string(recipe, n_servings))
+                    cat_recipes.append(recipe_string(recipe, n_servings, True))
 
         # pagebreak after each category
         recipe_list += ("---").join(cat_recipes)

@@ -18,7 +18,7 @@ from pyparsing import (
     MatchFirst
 )
 from collections import Counter
-from planner import Recipe
+from recipe import Recipe
 
 
 ## parser for recipe files
@@ -83,20 +83,19 @@ def build_recipe(recipe_string):
     else:
         counters = []
         for (subsection, ingredients) in parsed_recipe["ingredients"]:
-            counters.append((subsection, Counter({ingredient: amount / servings
+            counters.append((subsection, Counter({ingredient: amount
                                               for (ingredient, amount) in ingredients})))
 
         instr = parsed_recipe["instructions"][0] if "instructions" in parsed_recipe else ""
         mat = set(parsed_recipe["materials"]) if "materials" in parsed_recipe else set()
 
-        return Recipe(name, counters, instr, mat)
+        return Recipe(name, servings, counters, instr, mat)
 
 
 def parse_recipe(path):
     with open(path, 'r') as readfile:
         recipe_string = readfile.read()
         return build_recipe(recipe_string)
-
 
 ## parse a menu file
 #
