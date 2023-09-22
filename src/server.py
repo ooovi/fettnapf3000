@@ -21,7 +21,7 @@ def html_body(css, body):
                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
                  <link href="/static/css/{css}.css" rel="stylesheet">
                  <link href="/static/pwa_manifest.json" rel="manifest">
-                 <link rel="icon" href="../static/favicon.ico">
+                 <link rel="icon" href="/static/favicon.ico">
                  <title>fettnapf3000 Power Kalkulator!</title>
                 </head>
                 <body>
