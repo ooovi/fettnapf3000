@@ -1,0 +1,74 @@
+*{
+  font-family: monospace;
+}
+
+html {
+  background-color: #f2f2f2;
+}
+
+body {
+ max-width: 33em;
+ margin-right: auto;
+ margin-left: auto;
+ background-color: white;
+ padding: 4em;
+}
+
+form {
+  font-size: 1.5em;
+}
+
+form p {
+  display: flex;
+  align-items: center;
+}
+
+
+form select {
+  display: flex;
+  align-items: center;
+}
+
+form input[type="number"] {
+  max-width: 100%;
+}
+
+form input[type="number"] {
+  flex: 1;
+  max-width: 4em;
+  margin: 0;
+}
+
+fieldset {
+  margin: auto;
+}
+
+fieldset input[type="text"] {
+  flex: 1;
+  max-width: 66.666%;
+  margin: 0;
+}
+
+fieldset input[type="number"] {
+  flex: 1;
+  max-width: 33.333%;
+  margin: 0;
+}
+
+textarea {
+  width: 100%;
+  margin: 2em 0 2em 0;
+}
+
+input[type="submit"] {
+  margin: auto;
+  border: none;
+  width: 100%;
+  font-size: 1.5em;
+  padding: 0.6em;
+}
+
+h1 {
+  border-top: 2px solid #f2f2f2;
+  padding-top: 3em;
+}
