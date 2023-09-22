@@ -1,5 +1,5 @@
 import sys
-from parser import parse_menu, parse_recipe, ParseError
+from parser import parse_menu_file, parse_recipe, ParseError
 from planner import plan
 from pypandoc import convert_text
 
@@ -12,7 +12,7 @@ def main():
        # make a menu dict, mapping categories to lists of recipes and n_servings
        menu = {}
        for (category, recipe_name, n_servings) in menu_list:
-            recipe_file = sys.path[0] + "/../recipes/" + recipe_name + ".txt"
+            recipe_file = sys.path[0] + "/../recipes/team/" + recipe_name + ".txt"
             recipe = parse_recipe(recipe_file)
             if category in menu:
                 menu[category].append((recipe, n_servings))
