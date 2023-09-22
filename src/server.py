@@ -102,6 +102,10 @@ def recipe_list(user):
 class RecipePage:
     def __init__(self, user="team"):
         self.user = user
+        if not user == "team":
+            self.root = "/" + user
+        else:
+            self.root = ""
 
     @cherrypy.expose
     def index(self):
@@ -117,7 +121,7 @@ class RecipePage:
     def create_recipes_form(self):
         recipes = os.listdir(f"../recipes/{self.user}")
         recipes.sort()
-        html_string = f" <form action=\"request\" method=\"get\">"
+        html_string = f" <form action=\"{self.root}/request\" method=\"get\">"
         for recipe in recipes:
             html_string += f"""<p>
                 <label for="{recipe}">
@@ -419,6 +423,7 @@ if __name__ == '__main__':
     }
 
     root = RecipePage()
+    root.team = RecipePage("team")
     root.request = RequestPage()
     root.menu = MenuPage()
     root.calculate_menu = CalculateMenuPage()
