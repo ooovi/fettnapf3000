@@ -81,6 +81,7 @@ def plan_menu(menu):
             </div>
         """)
 
+
 def error_page(error):
     return html_body("menu",
         f"""<p style="font-size:7em; text-align:center;">
@@ -366,7 +367,9 @@ class AddRecipePage:
                     return error_page(f"Zutaten dürfen nur Buchstaben, Zahlen, Punkt und Komma enthalten, aber du hast {ingredient} gesagt.")
                 ingredient_list += f"{amount} {ingredient}\n"
 
-        if not ingredient_list:
+        if ingredient_list:
+            recipe += ingredient_list
+        else:
             return error_page("Dein Rezept hat keine Zutaten.")
 
         if instructions:
