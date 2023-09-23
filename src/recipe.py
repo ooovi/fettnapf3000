@@ -23,7 +23,7 @@ def recipe_string(recipe, n_servings=1, pretty=False):
     scaled_recipe = recipe.scaled_ingredients(n_servings)
     
     # name header
-    recipe_str = f"\n## {recipe.name.capitalize()}\n{n_servings:g} Portionen\n\n"
+    recipe_str = f"\n## {recipe.name.capitalize()}\n{n_servings:g} Portionen\n"
 
     if pretty: # make a pretty table
         for (subsection, scaled_ingredients) in scaled_recipe:

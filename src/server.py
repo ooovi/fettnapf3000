@@ -15,25 +15,55 @@ import json
 import string
 from collections import Counter
 
-def html_body(css, body):
-    return f"""<!DOCTYPE html>
-               <html lang="de">
-                <head>
-                 <meta charset="UTF-8">
-                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                 <link href="/static/css/{css}.css" rel="stylesheet">
-                 <link href="/static/pwa_manifest.json" rel="manifest">
-                 <link href="/static/favicon.ico" rel="icon">
-                 <title>fettnapf3000 Power Kalkulator!</title>
-                </head>
-                <body>
-                 {body}
-                 <footer style="margin-top: 5em; text-align: center;">
-                   <p>made with &#127814; by team geil</p>
-                   <p>contribute on <a href="https://github.com/ooovi/fettnapf3000">github</a></p>
-                 </footer>
-                </body>
-               </html>"""
+class FettnapfPage:
+    def __init__(self, user="team", add_footer=True):
+        self.add_footer = add_footer
+        self.user = user
+        if not user == "team":
+            self.root = "/" + user
+        else:
+            self.root = ""
+
+    def html_body(self, css, body):
+        footer = ""
+        if self.add_footer:
+            footer = f"""
+                     <hr>
+                     <nav style="text-align:center;">
+                      <a href="{self.root}/">Rezeptplaner</a> |
+                      <a href="{self.root}/menu">Menüplaner</a> |
+                      <a href="/repertoire">Repertoire verwalten</a>
+                    </nav>
+                     <footer style="margin-top: 3em; text-align: center;">
+                       <p>made with &#127814; by team geil</p>
+                       <p>contribute on <a href="https://github.com/ooovi/fettnapf3000">github</a></p>
+                     </footer>
+            """
+
+        return f"""<!DOCTYPE html>
+                   <html lang="de">
+                    <head>
+                     <meta charset="UTF-8">
+                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                     <link href="/static/css/{css}.css" rel="stylesheet">
+                     <link href="/static/pwa_manifest.json" rel="manifest">
+                     <link href="/static/favicon.ico" rel="icon">
+                     <title>fettnapf3000 Power Kalkulator!</title>
+                    </head>
+                    <body>
+                     {body}
+                     {footer}
+                    </body>
+                   </html>"""
+
+    def error_page(self, error):
+        return self.html_body("menu",
+            f"""<p style="font-size:5em; text-align:center;">
+                 <a href="#" onclick="history.back()" style="text-decoration: none">
+                 {randomoji()}
+                 </a></p>
+                 {error}
+            """)
 
 def randomoji():
     return choice(["&#127814;",
@@ -61,7 +91,7 @@ def randomoji_link(ref):
              {randomoji()}
             </a></p>"""
 
-def plan_menu(menu):
+def plan_menu(self,menu):
     plan = planner.plan(menu)
 
     extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
@@ -69,7 +99,7 @@ def plan_menu(menu):
         extensions=['tables','pymdownx.tasklist'],
         extension_configs=extension_configs)
 
-    return html_body("calculate",
+    return self.html_body("calculate",
         f"""<p style="font-size:5em; text-align:center;">
              <a onclick="window.print();" style="text-decoration: none">
               {randomoji()}
@@ -84,34 +114,18 @@ def plan_menu(menu):
         """)
 
 
-def error_page(error):
-    return html_body("menu",
-        f"""<p style="font-size:7em; text-align:center;">
-             <a href="#" onclick="history.back()" style="text-decoration: none">
-             {randomoji()}
-             </a></p>
-             {error}
-        """)
-
 
 def recipe_list(user):
-    recipes = [os.path.splitext(recipe)[0].capitalize() for recipe in os.listdir(f"../recipes/{user}")]
+    recipes = [os.path.splitext(recipe)[0].capitalize().replace("_"," ") for recipe in os.listdir(f"../recipes/{user}")]
     recipes.sort()
     return f"""<ul style="columns:2; -webkit-columns:2; -moz-columns:2; list-style-type:none;">
                 {"".join("<li>" + recipe + "</li>" for recipe in recipes)}
                </ul>"""
 
-class RecipePage:
-    def __init__(self, user="team"):
-        self.user = user
-        if not user == "team":
-            self.root = "/" + user
-        else:
-            self.root = ""
-
+class RecipePage(FettnapfPage):
     @cherrypy.expose
     def index(self):
-        return html_body("recipes",
+        return self.html_body("recipes",
         f"""{randomoji_link("menu")}
             <strong>Stelle Anzahl Portionen pro Gericht ein und drück auf Kalkulation!</strong>
             <br> Speicher danach den Link, um deine Kalkulation zu teilen, oder drucke die Seite aus.
@@ -134,17 +148,10 @@ class RecipePage:
         html_string += """<p><input type="submit" value="Kalkulation"></p></form>"""
         return html_string
 
-class MenuPage:
-    def __init__(self, user="team"):
-        self.user = user
-        if not user == "team":
-            self.root = "/" + user
-        else:
-            self.root = ""
-
+class MenuPage(FettnapfPage):
     @cherrypy.expose
     def index(self):
-        return html_body("menu",
+        return self.html_body("menu",
             f"""{randomoji_link(self.root + "/")}
                 <strong>Gib ein Menü in diesem Format an:</strong>
                 <div><pre>
@@ -168,9 +175,9 @@ class MenuPage:
                {recipe_list(self.user)}
             """)
 
-class CalculateMenuPage:
+class CalculateMenuPage(FettnapfPage):
     def __init__(self, user="team"):
-        self.user = user
+        FettnapfPage.__init__(self, user, False)
 
     @cherrypy.expose
     def index(self, **kwargs):
@@ -178,7 +185,7 @@ class CalculateMenuPage:
         try:
             menu_list = parser.parse_menu(menu_md)
         except parser.ParseError as e:
-            return error_page(f"""<strong>Dein Menü ist nicht im richtigen Format!</strong><br>
+            return self.error_page(f"""<strong>Dein Menü ist nicht im richtigen Format!</strong><br>
                         Geh zurück und schau es dir nochmal an. Der Fehler:<br>
                         <div>{e}</div>
                      """)
@@ -188,25 +195,18 @@ class CalculateMenuPage:
              try:
                  recipe = parser.parse_recipe(recipe_file)
              except IOError as e:
-                 return error_page(f"""<strong>Das Rezept {recipe_name.capitalize().replace("_"," ")} steht nicht in der Liste!</strong><br>
+                 return self.error_page(f"""<strong>Das Rezept {recipe_name.capitalize().replace("_"," ")} steht nicht in der Liste!</strong><br>
                         Geh zurück und schau es dir nochmal an.
                      """)
              if category in menu:
                  menu[category].append((recipe, n_servings))
              else:
                  menu[category] = [(recipe, n_servings)]
-        return plan_menu(menu)
+        return plan_menu(self, menu)
 
 
 
-class RequestPage:
-    def __init__(self, user="team"):
-        self.user = user
-        if not user == "team":
-            self.root = "/" + user
-        else:
-            self.root = ""
-
+class RequestPage(FettnapfPage):
     @cherrypy.expose
     def index(self, **kwargs):
         # clean empty form entries from url
@@ -215,13 +215,9 @@ class RequestPage:
             f"{self.root}/calculate/?" + '&'.join(f"{urllib.parse.quote(r)}={n}" for (r,n) in clean_request)
         )
 
-class CalculatePage:
+class CalculatePage(FettnapfPage):
     def __init__(self, user="team"):
-        self.user = user
-        if not user == "team":
-            self.root = user
-        else:
-            self.root = ""
+        FettnapfPage.__init__(self, user, False)
 
     @cherrypy.expose
     def index(self, **kwargs):
@@ -238,16 +234,19 @@ class CalculatePage:
                 else:
                      menu["Rezepte"] = [(recipe, n_servings)]
 
-        return plan_menu(menu)
+        return plan_menu(self, menu)
 
-class RepertoirePage:
+class RepertoirePage(FettnapfPage):
+    def __init__(self, user="team"):
+        FettnapfPage.__init__(self, user, False)
+    add_footer = False
     @cherrypy.expose
     def index(self, **kwargs):
         user = cherrypy.request.login
         text = ""
         if kwargs:
             text = kwargs["text"]
-        return html_body("repertoire",
+        return self.html_body("repertoire",
             f"""{randomoji_link(".")}
                 <p style="text-align:center;">
                  <strong>{text}</strong>
@@ -258,6 +257,9 @@ class RepertoirePage:
                 <form action="delete" method="post">
                  <p><input type="submit" value="Rezept löschen"></p>
                 </form>
+                <form action="edit" method="post">
+                 <p><input type="submit" value="Rezept editieren"></p>
+                </form>
                 <form action="../{user}">
                  <p><input type="submit" value="Kalkulation"></p>
                 </form>
@@ -266,13 +268,13 @@ class RepertoirePage:
                 {recipe_list(user)}
             """)
 
-class DeleteRecipePage:
+class DeleteRecipePage(FettnapfPage):
     @cherrypy.expose
     def index(self):
         user = cherrypy.request.login
         recipes = [os.path.splitext(recipe)[0].capitalize() for recipe in os.listdir(f"../recipes/{user}")]
         recipes.sort()
-        return html_body("repertoire",
+        return self.html_body("repertoire",
             f"""{randomoji_link(".")}
                 <form action="delete_recipe" method="post">
                  <select name="recipe_name" id="select" required style="width:100%">
@@ -298,7 +300,7 @@ class DeleteRecipePage:
         os.remove(recipe_path)
         raise cherrypy.HTTPRedirect("/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} gelöscht!"))
     
-class AddRecipePage:
+class AddRecipePage(FettnapfPage):
     n_ingredients = 15
 
     @cherrypy.expose
@@ -315,7 +317,7 @@ class AddRecipePage:
                            <input type="number" step="0.001" name="amount{i}" id="amount{i}">
                            <input type="text" name="ingredient{i}" id="ingredient{i}" list="ingredients">
                            """
-        return html_body("repertoire",
+        return self.html_body("repertoire",
             f"""<p style="font-size:5em; text-align:center;">
                  {randomoji()}
                 </p>
@@ -330,7 +332,7 @@ class AddRecipePage:
                   {formentries}
                  </fieldset><br><br>
                  <label for="instructions">Anleitung (optional):</label>
-                 <textarea name="instructions" id="instructions" style="height:15em"></textarea><br>
+                 <textarea name="instructions" id="instructions" style="height:15em;"></textarea><br>
                  <label for="materials">Besonderes Equipment (optional):</label>
                  <textarea name="materials" id="materials"></textarea><br><br>
                  <p><input type="submit" value="Rezept hinzufügen"></p>
@@ -364,9 +366,9 @@ class AddRecipePage:
             if ingredient:
                 amount = kwargs[f"amount{i}"]
                 if not amount:
-                    return error_page(f"Die Zutat {ingredient} hat keine Mengenangabe.")
+                    return self.error_page(f"Die Zutat {ingredient} hat keine Mengenangabe.")
                 if not set(ingredient).issubset(allowed.union(set("()"))):
-                    return error_page(f"Zutaten dürfen nur Buchstaben, Zahlen, Punkt und Komma enthalten, aber du hast {ingredient} gesagt.")
+                    return self.error_page(f"Zutaten dürfen nur Buchstaben, Zahlen, Punkt und Komma enthalten, aber du hast {ingredient} gesagt.")
                 ingredient_list.append((ingredient, float(amount)))
 
         if ingredient_list:
@@ -381,13 +383,96 @@ class AddRecipePage:
         recipe_filename = recipe_name.replace(" ","_")
         recipe_path = f"../recipes/{user}/{recipe_filename.lower()}.txt"
         if os.path.isfile(recipe_path):
-            return error_page(f"Gibt schon ein Rezept für {recipe_name}, nimm einen anderen Namen.")
+            return self.error_page(f"Gibt schon ein Rezept für {recipe_name}, nimm einen anderen Namen.")
 
         file = open(recipe_path, "a")
         file.write(recipe_string(recipe))
         file.close()
         
         raise cherrypy.HTTPRedirect("/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} hinzugefügt!"))
+
+class EditRecipePage(FettnapfPage):
+    @cherrypy.expose
+    def index(self, **kwargs):
+        if not kwargs:
+           user = cherrypy.request.login
+           recipes = [os.path.splitext(recipe)[0].capitalize() for recipe in os.listdir(f"../recipes/{user}")]
+           recipes.sort()
+           return self.html_body("repertoire",
+               f"""{randomoji_link(".")}
+                   <form action="" method="post">
+                    <select name="recipe_name" id="select" required style="width:100%">
+                     <option disabled selected value> -- Rezept zum editieren auswählen -- </option>
+                     {"".join("<option>" + recipe + "</option>" for recipe in recipes)}
+                    </select>
+                    <p><input type="submit" value="Editieren!"></p>
+                    </form>
+                   <form action="/repertoire">
+                    <p><input type="submit" value="Doch nicht."></p>
+                   </form>
+                    <br>
+                   <h1>Rezepte</h1>
+                   {recipe_list(user)}
+               """)
+        else:
+            recipe_name = kwargs["recipe_name"]
+            recipe_filename = recipe_name.replace(" ","_")
+            recipe_path = f"../recipes/{cherrypy.request.login}/{recipe_filename.lower()}.txt"
+            recipe = parser.parse_recipe(recipe_path)
+            recipe_noname = "\n".join(recipe_string(recipe).splitlines()[2:])            
+    
+            return self.html_body("repertoire",
+                f"""{randomoji_link(".")}
+                    <strong>Das Format muss beibehalten werden, sonst geht's nicht.</strong>
+                    <div><pre>
+10 Portionen
+
+### Zutaten
+
+#### Komponente 1
+1 Zwiebeln
+
+#### Komponente 2
+200 Knobi
+
+### Anleitung
+Komponenten separat pürieren, dann mischen.
+
+### Material
+Stabmixer
+                    </pre></div>
+                    <form action="edit_recipe" method="get">
+                     <label for="recipe_name"">Rezeptname:</label>
+                     <input name="recipe_name" value="{recipe_name}" readonly>
+                     <textarea name="recipe" style="height:30em;">{recipe_noname}</textarea><br>
+                     <p><input type="submit" value="Speichern"></p>
+                    </form>
+                    """)
+    
+
+
+    @cherrypy.expose
+    def edit_recipe(self, **kwargs):
+        recipe_name = kwargs["recipe_name"]
+        recipe_input = kwargs["recipe"]
+        try:
+            recipe = parser.build_recipe("## " + recipe_name + "\n" + recipe_input)
+            print(recipe)
+        except parser.ParseError as e:
+            return self.error_page(f"""<strong>Dein Rezept ist nicht im richtigen Format!</strong><br>
+                        Geh zurück und schau es dir nochmal an. Der Fehler:<br>
+                        <div>{e}</div>
+                     """)
+
+        recipe_name = recipe.name
+        recipe_filename = recipe_name.replace(" ","_")
+        recipe_path = f"../recipes/{cherrypy.request.login}/{recipe_filename.lower()}.txt"
+        os.remove(recipe_path)
+        file = open(recipe_path, "a")
+        file.write(recipe_string(recipe))
+        file.close()
+
+        raise cherrypy.HTTPRedirect("/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} editiert!"))
 
 USERS = json.load(open("users.txt"))
 KEY = open("key.txt").read()
@@ -426,6 +511,7 @@ if __name__ == '__main__':
     
     root.repertoire = RepertoirePage()
     root.repertoire.add = AddRecipePage()
+    root.repertoire.edit = EditRecipePage()
     root.repertoire.delete = DeleteRecipePage()
     
     root.food4action = RecipePage("food4action")
