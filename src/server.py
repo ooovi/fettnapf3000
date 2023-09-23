@@ -351,7 +351,7 @@ class AddRecipePage:
         if servings == "":
             return error_page("Bitte gib die Anzahl Portionen an.")
 
-        allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + ".,äöüÄÖÜß !?€\"\'")
+        allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + ".,äöüÄÖÜß !?€\"\'\n\r")
         if not set(instructions).issubset(allowed):
             return error_page("Anleitung darf nur Buchstaben, Zahlen, Punkt und Komma enthalten!")
         if not set(materials).issubset(allowed):
