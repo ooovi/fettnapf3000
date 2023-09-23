@@ -472,7 +472,7 @@ Stabmixer
         file.write(recipe_string(recipe))
         file.close()
 
-        raise cherrypy.HTTPRedirect("/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} editiert!"))
+        raise cherrypy.HTTPRedirect("/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} editiert!"))
 
 USERS = json.load(open("users.txt"))
 KEY = open("key.txt").read()
