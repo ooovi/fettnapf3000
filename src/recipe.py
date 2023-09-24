@@ -44,7 +44,7 @@ def recipe_string(recipe, n_servings=1, pretty=False):
         recipe_str += "\n### Zutaten\n"
         for (subsection, scaled_ingredients) in scaled_recipe:
             if subsection != "":
-                recipe_str += "\n#### " + subsection.capitalize()
+                recipe_str += "\n#### " + subsection.capitalize() + "\n"
             recipe_str += "\n".join(f"{amount} {ingredient}" for (ingredient, amount) in scaled_ingredients.items())
             recipe_str += "\n"
 
