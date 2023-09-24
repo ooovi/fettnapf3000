@@ -65,6 +65,38 @@ class FettnapfPage:
                  {error}
             """)
 
+
+    def recipe_list(self):
+        recipes = [os.path.splitext(recipe)[0] for recipe in os.listdir(f"../recipes/{self.user}")]
+        recipes.sort()
+        recipes = [f"""<a href="{self.root}/calculate?{recipe}.txt=10">{recipe.capitalize().replace("_"," ")}</a>""" for recipe in recipes]
+        return f"""<ul style="columns:2; -webkit-columns:2; -moz-columns:2; list-style-type:none;">
+                    {"".join("<li>" + recipe + "</li>" for recipe in recipes)}
+                   </ul>"""
+
+    def plan_menu(self,menu):
+        plan = planner.plan(menu)
+    
+        extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
+        plan_html = markdown.markdown(plan,
+            extensions=['tables','pymdownx.tasklist'],
+            extension_configs=extension_configs)
+    
+        return self.html_body("calculate",
+            f"""<p style="font-size:5em; text-align:center;">
+                 <a onclick="window.print();" style="text-decoration: none">
+                  {randomoji()}
+                 </a>
+                </p>
+                {plan_html}
+                <hr>
+                <div style="text-align: center;">
+                 Rezepte können Spuren von Tipp- und Denkfehlern enthalten.
+                 Wenn du welche findest, <a href="https://github.com/ooovi/fettnapf3000">sag Bescheid</a>!
+                </div>
+            """)
+
+
 def randomoji():
     return choice(["&#127814;",
                    "&#127798;",
@@ -90,37 +122,6 @@ def randomoji_link(ref):
             <a href="{ref}" style="text-decoration: none">
              {randomoji()}
             </a></p>"""
-
-def plan_menu(self,menu):
-    plan = planner.plan(menu)
-
-    extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
-    plan_html = markdown.markdown(plan,
-        extensions=['tables','pymdownx.tasklist'],
-        extension_configs=extension_configs)
-
-    return self.html_body("calculate",
-        f"""<p style="font-size:5em; text-align:center;">
-             <a onclick="window.print();" style="text-decoration: none">
-              {randomoji()}
-             </a>
-            </p>
-            {plan_html}
-            <hr>
-            <div style="text-align: center;">
-             Rezepte können Spuren von Tipp- und Denkfehlern enthalten.
-             Wenn du welche findest, <a href="https://github.com/ooovi/fettnapf3000">sag Bescheid</a>!
-            </div>
-        """)
-
-
-
-def recipe_list(user):
-    recipes = [os.path.splitext(recipe)[0].capitalize().replace("_"," ") for recipe in os.listdir(f"../recipes/{user}")]
-    recipes.sort()
-    return f"""<ul style="columns:2; -webkit-columns:2; -moz-columns:2; list-style-type:none;">
-                {"".join("<li>" + recipe + "</li>" for recipe in recipes)}
-               </ul>"""
 
 class RecipePage(FettnapfPage):
     @cherrypy.expose
@@ -172,7 +173,7 @@ class MenuPage(FettnapfPage):
                  <p><input type="submit" value="Kalkulation"></p>
                 </form>
                <h1>Rezepte</h1>
-               {recipe_list(self.user)}
+               {self.recipe_list()}
             """)
 
 class CalculateMenuPage(FettnapfPage):
@@ -202,7 +203,7 @@ class CalculateMenuPage(FettnapfPage):
                  menu[category].append((recipe, n_servings))
              else:
                  menu[category] = [(recipe, n_servings)]
-        return plan_menu(self, menu)
+        return self.plan_menu(menu)
 
 
 
@@ -234,7 +235,7 @@ class CalculatePage(FettnapfPage):
                 else:
                      menu["Rezepte"] = [(recipe, n_servings)]
 
-        return plan_menu(self, menu)
+        return self.plan_menu(menu)
 
 class RepertoirePage(FettnapfPage):
     def __init__(self, user="team"):
@@ -265,7 +266,7 @@ class RepertoirePage(FettnapfPage):
                 </form>
                  <br>
                 <h1>Rezepte</h1>
-                {recipe_list(user)}
+                {self.recipe_list()}
             """)
 
 class DeleteRecipePage(FettnapfPage):
@@ -288,7 +289,7 @@ class DeleteRecipePage(FettnapfPage):
                 </form>
                  <br>
                 <h1>Rezepte</h1>
-                {recipe_list(user)}
+                {self.recipe_list()}
             """)
 
 
@@ -412,7 +413,7 @@ class EditRecipePage(FettnapfPage):
                    </form>
                     <br>
                    <h1>Rezepte</h1>
-                   {recipe_list(user)}
+                   {self.recipe_list()}
                """)
         else:
             recipe_name = kwargs["recipe_name"]
