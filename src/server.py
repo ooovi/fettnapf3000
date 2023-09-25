@@ -37,6 +37,7 @@ class FettnapfPage:
                      <footer style="margin-top: 3em; text-align: center;">
                        <p>made with &#127814; by team geil</p>
                        <p>contribute on <a href="https://github.com/ooovi/fettnapf3000">github</a></p>
+                       <p>mail an fettnapf3000 ät posteo punkt de</p>
                      </footer>
             """
 
@@ -92,7 +93,7 @@ class FettnapfPage:
                 <hr>
                 <div style="text-align: center;">
                  Rezepte können Spuren von Tipp- und Denkfehlern enthalten.
-                 Wenn du welche findest, <a href="https://github.com/ooovi/fettnapf3000">sag Bescheid</a>!
+                 Wenn du welche findest, mail an fettnapf3000 ät posteo punkt de</a>!
                 </div>
             """)
 
