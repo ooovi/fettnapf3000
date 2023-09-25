@@ -69,7 +69,7 @@ class FettnapfPage:
     def recipe_list(self):
         recipes = [os.path.splitext(recipe)[0] for recipe in os.listdir(f"../recipes/{self.user}")]
         recipes.sort()
-        recipes = [f"""<a href="{self.root}/calculate?{recipe}.txt=10">{recipe.capitalize().replace("_"," ")}</a>""" for recipe in recipes]
+        recipes = [f"""<a href="{self.root}/calculate?{urllib.parse.quote(recipe)}.txt=10">{recipe.capitalize().replace("_"," ")}</a>""" for recipe in recipes]
         return f"""<ul style="columns:2; -webkit-columns:2; -moz-columns:2; list-style-type:none;">
                     {"".join("<li>" + recipe + "</li>" for recipe in recipes)}
                    </ul>"""
