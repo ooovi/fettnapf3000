@@ -33,8 +33,8 @@ class FettnapfPage:
                      <hr>
                      <nav style="text-align:center;">
                       <a href="{self.root}/">Rezeptplaner</a> |
-                      <a href="{self.root}/menu">Menüplaner</a> |
-                      <a href="{self.root}/repertoire">Repertoire verwalten</a>
+                      <a href="{self.root}/menu/">Menüplaner</a> |
+                      <a href="{self.root}/repertoire/">Repertoire verwalten</a>
                     </nav>
                      <footer style="margin-top: 3em; text-align: center;">
                        <p>made with &#127814; by team geil</p>
