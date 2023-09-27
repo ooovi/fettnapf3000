@@ -420,7 +420,6 @@ class EditRecipePage(FettnapfPage):
         else:
             recipe_name = kwargs["recipe_name"]
             recipe = Recipe.from_document(self.db.search(Query().name == recipe_name)[0])
-            recipe_noname = "\n".join(recipe_string(recipe).splitlines()[2:])
 
             return self.html_body("repertoire",
                 f"""{randomoji_link(".")}
@@ -444,29 +443,32 @@ Stabmixer
                     </pre></div>
                     <form action="edit_recipe" method="get">
                      <label for="recipe_name"">Rezeptname:</label>
-                     <input name="recipe_name" value="{recipe_name}" readonly>
-                     <textarea name="recipe" style="height:30em;">{recipe_noname}</textarea><br>
+                     <input name="recipe_name" value="{recipe_name}" readonly input type="hidden">
+                     <textarea name="recipe" style="height:30em;">{recipe_string(recipe)}</textarea><br>
                      <p><input type="submit" value="Speichern"></p>
                     </form>
                     """)
 
     @cherrypy.expose
     def edit_recipe(self, **kwargs):
-        recipe_name = kwargs["recipe_name"]
         recipe_input = kwargs["recipe"]
+        recipe_name = kwargs["recipe_name"]
         try:
-            recipe = parser.build_recipe("## " + recipe_name + "\n" + recipe_input)
+            recipe = parser.build_recipe(recipe_input)
         except parser.ParseError as e:
             return self.error_page(f"""<strong>Dein Rezept ist nicht im richtigen Format!</strong><br>
                         Geh zurück und schau es dir nochmal an. Der Fehler:<br>
                         <div>{e}</div>
                      """)
 
-        recipe_name = recipe.name
-        self.db.remove(Query().name == recipe_name)
-        self.db.insert(recipe_dict(recipe))
+        new_recipe_name = recipe.name
+        if self.db.search(Query().name == new_recipe_name ):
+            return self.error_page(f"Gibt schon ein Rezept für {new_recipe_name}, nimm einen anderen Namen.")
+        else:
+            self.db.remove(Query().name == recipe_name)
+            self.db.insert(recipe_dict(recipe))
 
-        raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} editiert!"))
+            raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} editiert!"))
 
 TEAM_USERS = json.load(open("users.txt"))
 F4A_USERS = json.load(open("f4a_users.txt"))
