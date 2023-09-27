@@ -21,10 +21,6 @@ hr {
   margin: 5em 0;
 }
 
-form {
-  font-size: 1.5em;
-}
-
 form p {
   display: flex;
   align-items: center;
@@ -50,9 +46,6 @@ input[type="submit"] {
 }
 
 @media only screen and (max-width: 480px) {
-  form {
-    font-size: 1.5em
-  }
 
   label {
     max-width: 80%;
