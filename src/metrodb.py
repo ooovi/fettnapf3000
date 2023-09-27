@@ -159,6 +159,7 @@ entries = [
     {"english": "genuss-block"                 , "category": "kühlware"    , "ingredient" : "genuss-block"                    },
     {"english": "fresh yeast"                  , "category": "kühlware"    , "ingredient" : "frische hefe"                    },
     {"english": "crewcare"                     , "category": "snacks"      , "ingredient" : "crewcare"                        },
+    {"english": "puffed rice cakes"            , "category": "snacks"      , "ingredient" : "reiswaffeln"                     },
     {"english": "crisps"                       , "category": "snacks"      , "ingredient" : "chips"                           },
     {"english": "pecans"                       , "category": "snacks"      , "ingredient" : "pekannüsse"                      },
     {"english": "walnuts"                      , "category": "snacks"      , "ingredient" : "walnüsse"                        },

@@ -2,7 +2,7 @@ from collections import Counter
 
 class Recipe:
     def __init__(self, name: str, n_servings: int, ingredients: [(str,Counter)], instructions: str, materials: set[str]):
-        self.name = name
+        self.name = name.lower()
         self.n_servings = n_servings
         self.ingredients = ingredients
         self.instructions = instructions
