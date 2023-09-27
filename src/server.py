@@ -1,12 +1,13 @@
 import sys
 import os, os.path
+import tinydb
 import cherrypy
 from cherrypy.lib import auth_digest
 import markdown
 import pymdownx
 import planner
 import parser
-from recipe import Recipe, recipe_string
+from recipe import Recipe, recipe_string, recipe_dict
 from metrodb import metrodb
 from random import choice
 import urllib.parse
@@ -23,6 +24,7 @@ class FettnapfPage:
             self.root = "/" + user
         else:
             self.root = ""
+        self.db = tinydb.TinyDB(f'../recipes/{self.user}_recipes.json')
 
     def html_body(self, css, body):
         footer = ""
@@ -32,7 +34,7 @@ class FettnapfPage:
                      <nav style="text-align:center;">
                       <a href="{self.root}/">Rezeptplaner</a> |
                       <a href="{self.root}/menu">Menüplaner</a> |
-                      <a href="/repertoire">Repertoire verwalten</a>
+                      <a href="{self.root}/repertoire">Repertoire verwalten</a>
                     </nav>
                      <footer style="margin-top: 3em; text-align: center;">
                        <p>made with &#127814; by team geil</p>
@@ -66,12 +68,15 @@ class FettnapfPage:
                  {error}
             """)
 
+    def recipes(self):
+        self.db = tinydb.TinyDB(f'../recipes/{self.user}_recipes.json')
+        recipes = [recipe['name'] for recipe in self.db.search(Query().name.exists())]
+        recipes.sort()
+        return recipes
 
     def recipe_list(self):
-        recipes = [os.path.splitext(recipe)[0] for recipe in os.listdir(f"../recipes/{self.user}")]
-        recipes.sort()
-        recipes = [f"""<a href="{self.root}/calculate?{urllib.parse.quote(recipe)}.txt=10">{recipe.capitalize().replace("_"," ")}</a>""" for recipe in recipes]
-        return f"""<ul style="columns:2; -webkit-columns:2; -moz-columns:2; list-style-type:none;">
+        recipes = [f"""<a href="{self.root}/calculate?{urllib.parse.quote(recipe)}=10">{recipe.capitalize().replace("_"," ")}</a>""" for recipe in self.recipes()]
+        return f"""<ul style="list-style-type:none;">
                     {"".join("<li>" + recipe + "</li>" for recipe in recipes)}
                    </ul>"""
 
@@ -137,13 +142,11 @@ class RecipePage(FettnapfPage):
         """)
 
     def create_recipes_form(self):
-        recipes = os.listdir(f"../recipes/{self.user}")
-        recipes.sort()
         html_string = f" <form action=\"{self.root}/request\" method=\"get\">"
-        for recipe in recipes:
+        for recipe in self.recipes():
             html_string += f"""<p>
                 <label for="{recipe}">
-                 {os.path.splitext(recipe)[0].capitalize().replace("_"," ")}:&ensp;
+                 {recipe.capitalize()}:&ensp;
                 </label>
                 <input type="number" name="{recipe}" id="{recipe}"><br>
                 </p>"""
@@ -193,10 +196,10 @@ class CalculateMenuPage(FettnapfPage):
                      """)
         menu = {}
         for (category, recipe_name, n_servings) in menu_list:
-             recipe_file = f"../recipes/{self.user}/" + recipe_name + ".txt"
-             try:
-                 recipe = parser.parse_recipe(recipe_file)
-             except IOError as e:
+             recipe_entries = self.db.search(Query().name == recipe_name)
+             if recipe_entries:
+                 recipe = Recipe.from_document(recipe_entries[0])
+             else:
                  return self.error_page(f"""<strong>Das Rezept {recipe_name.capitalize().replace("_"," ")} steht nicht in der Liste!</strong><br>
                         Geh zurück und schau es dir nochmal an.
                      """)
@@ -229,7 +232,13 @@ class CalculatePage(FettnapfPage):
         menu = {}
         for (recipe_name, n) in kwargs.items():
             if n:
-                recipe = parser.parse_recipe(f"../recipes/{self.user}/" + recipe_name)
+                recipe_entries = self.db.search(Query().name == recipe_name)
+                if recipe_entries:
+                    recipe = Recipe.from_document(recipe_entries[0])
+                else:
+                    return self.error_page(f"""<strong>Das Rezept {recipe_name.capitalize().replace("_"," ")} steht nicht in der Liste!</strong><br>
+                           Geh zurück und schau es dir nochmal an.
+                        """)
                 n_servings = int(n)
                 if "Rezepte" in menu:
                      menu["Rezepte"].append((recipe, n_servings))
@@ -244,7 +253,6 @@ class RepertoirePage(FettnapfPage):
     add_footer = False
     @cherrypy.expose
     def index(self, **kwargs):
-        user = cherrypy.request.login
         text = ""
         if kwargs:
             text = kwargs["text"]
@@ -262,7 +270,7 @@ class RepertoirePage(FettnapfPage):
                 <form action="edit" method="post">
                  <p><input type="submit" value="Rezept editieren"></p>
                 </form>
-                <form action="../{user}">
+                <form action="..">
                  <p><input type="submit" value="Kalkulation"></p>
                 </form>
                  <br>
@@ -273,19 +281,16 @@ class RepertoirePage(FettnapfPage):
 class DeleteRecipePage(FettnapfPage):
     @cherrypy.expose
     def index(self):
-        user = cherrypy.request.login
-        recipes = [os.path.splitext(recipe)[0].capitalize() for recipe in os.listdir(f"../recipes/{user}")]
-        recipes.sort()
         return self.html_body("repertoire",
             f"""{randomoji_link(".")}
                 <form action="delete_recipe" method="post">
                  <select name="recipe_name" id="select" required style="width:100%">
                   <option disabled selected value> -- Rezept zum löschen auswählen -- </option>
-                  {"".join("<option>" + recipe + "</option>" for recipe in recipes)}
+                  {"".join("<option>" + recipe + "</option>" for recipe in self.recipes())}
                  </select>
                  <p><input type="submit" value="Wirklich löschen!"></p>
                  </form>
-                <form action="/repertoire">
+                <form action="{self.root}/repertoire">
                  <p><input type="submit" value="Doch nicht."></p>
                 </form>
                  <br>
@@ -297,10 +302,9 @@ class DeleteRecipePage(FettnapfPage):
     @cherrypy.expose
     def delete_recipe(self, **kwargs):
         recipe_name = kwargs["recipe_name"]
-        recipe_filename = recipe_name.replace(" ","_")
-        recipe_path = f"../recipes/{cherrypy.request.login}/{recipe_filename.lower()}.txt"
-        os.remove(recipe_path)
-        raise cherrypy.HTTPRedirect("/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} gelöscht!"))
+        self.db.remove(Query().name == recipe_name)
+        self.db = tinydb.TinyDB(f'../recipes/{self.user}_recipes.json')
+        raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} gelöscht!"))
     
 class AddRecipePage(FettnapfPage):
     n_ingredients = 15
@@ -379,37 +383,34 @@ class AddRecipePage(FettnapfPage):
         else:
             return error_page("Dein Rezept hat keine Zutaten.")
 
-        recipe = Recipe(recipe_name, int(servings), ingredients_counter, instructions, set(materials.split(",")))
+        if materials:
+            materials = set(materials.split(","))
+        else:
+            materials = set()
 
-        user = cherrypy.request.login
-        recipe_filename = recipe_name.replace(" ","_")
-        recipe_path = f"../recipes/{user}/{recipe_filename.lower()}.txt"
-        if os.path.isfile(recipe_path):
+        recipe = Recipe(recipe_name, int(servings), ingredients_counter, instructions, materials)
+
+        if self.db.search(Query().name == recipe_name):
             return self.error_page(f"Gibt schon ein Rezept für {recipe_name}, nimm einen anderen Namen.")
-
-        file = open(recipe_path, "a")
-        file.write(recipe_string(recipe))
-        file.close()
-        
-        raise cherrypy.HTTPRedirect("/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} hinzugefügt!"))
+        else:
+            self.db.insert(recipe_dict(recipe))
+            self.db = tinydb.TinyDB(f'../recipes/{self.user}_recipes.json')
+            raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} hinzugefügt!"))
 
 class EditRecipePage(FettnapfPage):
     @cherrypy.expose
     def index(self, **kwargs):
         if not kwargs:
-           user = cherrypy.request.login
-           recipes = [os.path.splitext(recipe)[0].capitalize() for recipe in os.listdir(f"../recipes/{user}")]
-           recipes.sort()
            return self.html_body("repertoire",
                f"""{randomoji_link(".")}
                    <form action="" method="post">
                     <select name="recipe_name" id="select" required style="width:100%">
                      <option disabled selected value> -- Rezept zum editieren auswählen -- </option>
-                     {"".join("<option>" + recipe + "</option>" for recipe in recipes)}
+                     {"".join("<option>" + recipe + "</option>" for recipe in self.recipes())}
                     </select>
                     <p><input type="submit" value="Editieren!"></p>
                     </form>
-                   <form action="/repertoire">
+                   <form action="{self.root}/repertoire">
                     <p><input type="submit" value="Doch nicht."></p>
                    </form>
                     <br>
@@ -418,11 +419,9 @@ class EditRecipePage(FettnapfPage):
                """)
         else:
             recipe_name = kwargs["recipe_name"]
-            recipe_filename = recipe_name.replace(" ","_")
-            recipe_path = f"../recipes/{cherrypy.request.login}/{recipe_filename.lower()}.txt"
-            recipe = parser.parse_recipe(recipe_path)
-            recipe_noname = "\n".join(recipe_string(recipe).splitlines()[2:])            
-    
+            recipe = Recipe.from_document(self.db.search(Query().name == recipe_name)[0])
+            recipe_noname = "\n".join(recipe_string(recipe).splitlines()[2:])
+
             return self.html_body("repertoire",
                 f"""{randomoji_link(".")}
                     <strong>Das Format muss beibehalten werden, sonst geht's nicht.</strong>
@@ -450,8 +449,6 @@ Stabmixer
                      <p><input type="submit" value="Speichern"></p>
                     </form>
                     """)
-    
-
 
     @cherrypy.expose
     def edit_recipe(self, **kwargs):
@@ -459,7 +456,6 @@ Stabmixer
         recipe_input = kwargs["recipe"]
         try:
             recipe = parser.build_recipe("## " + recipe_name + "\n" + recipe_input)
-            print(recipe)
         except parser.ParseError as e:
             return self.error_page(f"""<strong>Dein Rezept ist nicht im richtigen Format!</strong><br>
                         Geh zurück und schau es dir nochmal an. Der Fehler:<br>
@@ -467,16 +463,13 @@ Stabmixer
                      """)
 
         recipe_name = recipe.name
-        recipe_filename = recipe_name.replace(" ","_")
-        recipe_path = f"../recipes/{cherrypy.request.login}/{recipe_filename.lower()}.txt"
-        os.remove(recipe_path)
-        file = open(recipe_path, "a")
-        file.write(recipe_string(recipe))
-        file.close()
+        self.db.remove(Query().name == recipe_name)
+        self.db.insert(recipe_dict(recipe))
 
-        raise cherrypy.HTTPRedirect("/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} editiert!"))
+        raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} editiert!"))
 
-USERS = json.load(open("users.txt"))
+TEAM_USERS = json.load(open("users.txt"))
+F4A_USERS = json.load(open("f4a_users.txt"))
 KEY = open("key.txt").read()
 
 if __name__ == '__main__':
@@ -498,7 +491,14 @@ if __name__ == '__main__':
         '/repertoire': {
             'tools.auth_digest.on': True,
             'tools.auth_digest.realm': 'localhost',
-            'tools.auth_digest.get_ha1': auth_digest.get_ha1_dict_plain(USERS),
+            'tools.auth_digest.get_ha1': auth_digest.get_ha1_dict_plain(TEAM_USERS),
+            'tools.auth_digest.key': KEY,
+            'tools.auth_digest.accept_charset': 'UTF-8',
+         },
+         '/food4action/repertoire': {
+            'tools.auth_digest.on': True,
+            'tools.auth_digest.realm': 'localhost',
+            'tools.auth_digest.get_ha1': auth_digest.get_ha1_dict_plain(F4A_USERS),
             'tools.auth_digest.key': KEY,
             'tools.auth_digest.accept_charset': 'UTF-8',
          }
@@ -510,16 +510,21 @@ if __name__ == '__main__':
     root.menu = MenuPage()
     root.calculate_menu = CalculateMenuPage()
     root.calculate = CalculatePage()
-    
+
     root.repertoire = RepertoirePage()
     root.repertoire.add = AddRecipePage()
     root.repertoire.edit = EditRecipePage()
     root.repertoire.delete = DeleteRecipePage()
-    
+
     root.food4action = RecipePage("food4action")
     root.food4action.request = RequestPage("food4action")
     root.food4action.menu = MenuPage("food4action")
     root.food4action.calculate_menu = CalculateMenuPage("food4action")
     root.food4action.calculate = CalculatePage("food4action")
+
+    root.food4action.repertoire = RepertoirePage("food4action")
+    root.food4action.repertoire.add = AddRecipePage("food4action")
+    root.food4action.repertoire.edit = EditRecipePage("food4action")
+    root.food4action.repertoire.delete = DeleteRecipePage("food4action")
 
     cherrypy.quickstart(root, config = conf)

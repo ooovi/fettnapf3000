@@ -1,24 +1,29 @@
 from collections import Counter
 
-def scale(unscaled_ingredients: [(str, Counter)], n_servings: float):
-    scaled = []
-    for (section, ingredients) in unscaled_ingredients:
-        scaled.append((section, Counter({i : n_servings * ingredients[i] for i in ingredients})))
-    return scaled
-
 class Recipe:
     def __init__(self, name: str, n_servings: int, ingredients: [(str,Counter)], instructions: str, materials: set[str]):
         self.name = name
-        self.ingredients = scale(ingredients, 1/n_servings)
+        self.n_servings = n_servings
+        self.ingredients = ingredients
         self.instructions = instructions
         self.materials = materials
-        self.total_weight = round(sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in self.ingredients]),3)
+        self.total_weight = round(sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in self.ingredients])/n_servings,3)
 
-    def scaled_ingredients(self, n_servings: float):
-        return scale(self.ingredients, n_servings)
+    def scaled_ingredients(self, n_servings: float) -> Counter:
+        scaled = []
+        for (section, ingredients) in self.ingredients:
+            scaled.append((section, Counter({i : n_servings * (ingredients[i] / self.n_servings) for i in ingredients})))
+        return scaled
+
+    @classmethod
+    def from_document(cls, doc):
+        return cls(doc["name"], doc["n_servings"], doc["ingredients"], doc["instructions"], set(doc["materials"]))
 
 # make a nice markdown recipe
-def recipe_string(recipe, n_servings=1, pretty=False):
+def recipe_string(recipe: Recipe, n_servings=None, pretty=False) -> str:
+
+    if not n_servings:
+        n_servings = recipe.n_servings
 
     scaled_recipe = recipe.scaled_ingredients(n_servings)
     
@@ -63,3 +68,12 @@ def recipe_string(recipe, n_servings=1, pretty=False):
     recipe_str += "\n\n"
     
     return recipe_str
+
+def recipe_dict(recipe: Recipe) -> dict:
+    return {
+        "name" : recipe.name,
+        "n_servings" : recipe.n_servings,
+        "ingredients" : recipe.ingredients,
+        "instructions" : recipe.instructions,
+        "materials" : [m for m in recipe.materials],
+    }
