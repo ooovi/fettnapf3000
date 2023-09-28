@@ -16,6 +16,8 @@ import json
 import string
 from collections import Counter
 
+db = {"team":tinydb.TinyDB(f'../recipes/team_recipes.json'), "food4action":tinydb.TinyDB(f'../recipes/food4action_recipes.json')}
+
 class FettnapfPage:
     def __init__(self, user="team", add_footer=True):
         self.add_footer = add_footer
@@ -24,7 +26,6 @@ class FettnapfPage:
             self.root = "/" + user
         else:
             self.root = ""
-        self.db = tinydb.TinyDB(f'../recipes/{self.user}_recipes.json')
 
     def html_body(self, css, body):
         footer = ""
@@ -69,8 +70,7 @@ class FettnapfPage:
             """)
 
     def recipes(self):
-        self.db = tinydb.TinyDB(f'../recipes/{self.user}_recipes.json')
-        recipes = [recipe['name'] for recipe in self.db.search(Query().name.exists())]
+        recipes = [recipe['name'] for recipe in db[self.user].search(Query().name.exists())]
         recipes.sort()
         return recipes
 
@@ -196,7 +196,7 @@ class CalculateMenuPage(FettnapfPage):
                      """)
         menu = {}
         for (category, recipe_name, n_servings) in menu_list:
-             recipe_entries = self.db.search(Query().name == recipe_name)
+             recipe_entries = db[self.user].search(Query().name == recipe_name)
              if recipe_entries:
                  recipe = Recipe.from_document(recipe_entries[0])
              else:
@@ -232,7 +232,7 @@ class CalculatePage(FettnapfPage):
         menu = {}
         for (recipe_name, n) in kwargs.items():
             if n:
-                recipe_entries = self.db.search(Query().name == recipe_name)
+                recipe_entries = db[self.user].search(Query().name == recipe_name)
                 if recipe_entries:
                     recipe = Recipe.from_document(recipe_entries[0])
                 else:
@@ -302,8 +302,7 @@ class DeleteRecipePage(FettnapfPage):
     @cherrypy.expose
     def delete_recipe(self, **kwargs):
         recipe_name = kwargs["recipe_name"]
-        self.db.remove(Query().name == recipe_name)
-        self.db = tinydb.TinyDB(f'../recipes/{self.user}_recipes.json')
+        db[self.user].remove(Query().name == recipe_name)
         raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} gelöscht!"))
     
 class AddRecipePage(FettnapfPage):
@@ -390,11 +389,10 @@ class AddRecipePage(FettnapfPage):
 
         recipe = Recipe(recipe_name, int(servings), ingredients_counter, instructions, materials)
 
-        if self.db.search(Query().name == recipe_name):
+        if db[self.user].search(Query().name == recipe_name):
             return self.error_page(f"Gibt schon ein Rezept für {recipe_name}, nimm einen anderen Namen.")
         else:
-            self.db.insert(recipe_dict(recipe))
-            self.db = tinydb.TinyDB(f'../recipes/{self.user}_recipes.json')
+            db[self.user].insert(recipe_dict(recipe))
             raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} hinzugefügt!"))
 
 class EditRecipePage(FettnapfPage):
@@ -419,7 +417,7 @@ class EditRecipePage(FettnapfPage):
                """)
         else:
             recipe_name = kwargs["recipe_name"]
-            recipe = Recipe.from_document(self.db.search(Query().name == recipe_name)[0])
+            recipe = Recipe.from_document(db[self.user].search(Query().name == recipe_name)[0])
 
             return self.html_body("repertoire",
                 f"""{randomoji_link(".")}
@@ -462,11 +460,11 @@ Stabmixer
                      """)
 
         new_recipe_name = recipe.name
-        if not(recipe_name == new_recipe_name) and self.db.search(Query().name == new_recipe_name ):
+        if not(recipe_name == new_recipe_name) and db[self.user].search(Query().name == new_recipe_name ):
             return self.error_page(f"Gibt schon ein Rezept für {new_recipe_name}, nimm einen anderen Namen.")
         else:
-            self.db.remove(Query().name == recipe_name)
-            self.db.insert(recipe_dict(recipe))
+            db[self.user].remove(Query().name == recipe_name)
+            db[self.user].insert(recipe_dict(recipe))
 
             raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} editiert!"))
 
