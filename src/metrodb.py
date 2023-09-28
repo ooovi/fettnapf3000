@@ -129,6 +129,7 @@ entries = [
     {"english": "sojahack (dry)"               , "category": "trockenware" , "ingredient" : "sojahack (trocken)"              },
     {"english": "lasagna sheets"               , "category": "trockenware" , "ingredient" : "lasagneplatten"                  },
     {"english": "pasta"                        , "category": "trockenware" , "ingredient" : "pasta"                           },
+    {"english": "couscous"                     , "category": "trockenware" , "ingredient" : "couscous"                        },
     {"english": "grünkern"                     , "category": "trockenware" , "ingredient" : "grünkern"                        },
     {"english": "basmati"                      , "category": "trockenware" , "ingredient" : "basmati"                         },
     {"english": "brown lentils"                , "category": "trockenware" , "ingredient" : "braune linsen (tellerlinsen)"    },
