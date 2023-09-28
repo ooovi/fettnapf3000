@@ -462,7 +462,7 @@ Stabmixer
                      """)
 
         new_recipe_name = recipe.name
-        if self.db.search(Query().name == new_recipe_name ):
+        if not(recipe_name == new_recipe_name) and self.db.search(Query().name == new_recipe_name ):
             return self.error_page(f"Gibt schon ein Rezept für {new_recipe_name}, nimm einen anderen Namen.")
         else:
             self.db.remove(Query().name == recipe_name)
