@@ -85,11 +85,17 @@ class FettnapfPage:
             recipes.setdefault(cat, []).append(recipe['name'])
         return recipes
 
-    def recipe_list(self):
+    def recipe_list(self, edit=False):
         html_str = """<dl style="list-style-type:none;">"""
         for (cat, recipes) in sorted(self.recipes_cat().items()):
             recipes.sort()
-            recipe_links = [f"""<a href="{self.root}/calculate?{urllib.parse.quote(recipe)}=10">{recipe.capitalize().replace("_"," ")}</a>""" for recipe in recipes]
+            recipe_links = []
+            for recipe in recipes:
+                if edit:
+                    link = f"repertoire/edit/?recipe_name={urllib.parse.quote(recipe)}"
+                else:
+                    link = f"calculate?{urllib.parse.quote(recipe)}=10"
+                recipe_links.append(f"""<a href="{self.root}/{link}">{recipe.capitalize().replace("_"," ")}</a>""")
             html_str += f"<dt style=\"font-size:1.2em;padding-top:0.5em\"><strong>{cat.capitalize()}</strong></dt>"
             html_str += "".join("<dd>" + recipe + "</dd>" for recipe in recipe_links)
         return html_str + "</dl>"
@@ -294,7 +300,7 @@ class RepertoirePage(FettnapfPage):
                 </form>
                  <br>
                 <h1>Rezepte</h1>
-                {self.recipe_list()}
+                {self.recipe_list(True)}
             """)
 
 class DeleteRecipePage(FettnapfPage):
