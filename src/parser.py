@@ -18,7 +18,10 @@ from pyparsing import (
     MatchFirst
 )
 from collections import Counter
-from recipe import Recipe
+from recipe import Recipe, recipe_dict
+from tinydb import TinyDB
+import os, os.path
+
 
 
 ## parser for recipe files
@@ -40,6 +43,7 @@ maybebreaks = ZeroOrMore(linebreak)
 title = Suppress("## ") + word + linebreaks
 
 servings = weight + Suppress("Portionen") + linebreaks
+category = Suppress("Kategorie: ") + word + linebreaks
 
 ingredient = weight + Suppress(ZeroOrMore(' ')) + word + linebreak
 ingredient.setParseAction(lambda l : tuple(reversed(l))) # reverse so it fits the Counter constructor
@@ -60,6 +64,7 @@ materials = section("Material", OneOrMore(word + linebreak))
 
 recipe_parser = title("name")\
               + servings("servings")\
+              + category("category")\
               + (ingredients("ingredients")\
               & Optional(instructions)("instructions")\
               & Optional(materials)("materials"))
@@ -78,6 +83,7 @@ def build_recipe(recipe_string):
         
     name = parsed_recipe.name[0]
     servings = parsed_recipe.servings[0]
+    category = parsed_recipe.category[0]
     if servings == 0:
         raise ParseError(f"Error parsing recipe {name}: zero number of servings")
     else:
@@ -89,7 +95,7 @@ def build_recipe(recipe_string):
         instr = parsed_recipe["instructions"][0] if "instructions" in parsed_recipe else ""
         mat = set(parsed_recipe["materials"]) if "materials" in parsed_recipe else set()
 
-        return Recipe(name, servings, counters, instr, mat)
+        return Recipe(name, servings, counters, instr, mat, category)
 
 
 def parse_recipe(path):
@@ -121,3 +127,6 @@ def parse_menu(menu_string: str) -> list[tuple[str, str, float]]:
             menu.append((cat_name, recipe_name, servings))
     return menu
 
+def recipe_db(path):
+    db = TinyDB('recipe_db.json')
+    db.insert_multiple([recipe_dict(parse_recipe(path+"/"+recipe)) for recipe in os.listdir(path) if recipe.endswith(".txt")])

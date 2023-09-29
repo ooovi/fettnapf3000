@@ -1,12 +1,13 @@
 from collections import Counter
 
 class Recipe:
-    def __init__(self, name: str, n_servings: int, ingredients: [(str,Counter)], instructions: str, materials: set[str]):
+    def __init__(self, name: str, n_servings: int, ingredients: [(str,Counter)], instructions: str, materials: set[str], category="misc"):
         self.name = name.lower()
         self.n_servings = n_servings
         self.ingredients = [(section, Counter({i.lower() : c for (i,c) in ings.items()})) for (section, ings) in ingredients]
         self.instructions = instructions
         self.materials = set(material.lower() for material in materials)
+        self.category = category.lower()
         self.total_weight = round(sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in self.ingredients])/n_servings,3)
 
     def scaled_ingredients(self, n_servings: float) -> Counter:
@@ -17,7 +18,11 @@ class Recipe:
 
     @classmethod
     def from_document(cls, doc):
-        return cls(doc["name"], doc["n_servings"], doc["ingredients"], doc["instructions"], set(doc["materials"]))
+        if "category" in doc:
+            cat = doc["category"]
+        else:
+            cat = "misc"
+        return cls(doc["name"], doc["n_servings"], doc["ingredients"], doc["instructions"], set(doc["materials"]), cat)
 
 # make a nice markdown recipe
 def recipe_string(recipe: Recipe, n_servings=None, pretty=False) -> str:
@@ -46,6 +51,7 @@ def recipe_string(recipe: Recipe, n_servings=None, pretty=False) -> str:
         recipe_str += f"\nGewicht pro Portion: {recipe.total_weight:g} kg\n"
 
     else: # just make a human readable string
+        recipe_str += "Kategorie: " + recipe.category + "\n\n"
         recipe_str += "\n### Zutaten\n"
         for (subsection, scaled_ingredients) in scaled_recipe:
             if subsection != "":
@@ -76,4 +82,5 @@ def recipe_dict(recipe: Recipe) -> dict:
         "ingredients" : recipe.ingredients,
         "instructions" : recipe.instructions,
         "materials" : [m for m in recipe.materials],
+        "category" : recipe.category
     }

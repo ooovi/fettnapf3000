@@ -75,11 +75,24 @@ class FettnapfPage:
         recipes.sort()
         return recipes
 
+    def recipes_cat(self):
+        recipes = {}
+        for recipe in db[self.user].search(Query().name.exists()):
+            if 'category' in recipe:
+                cat = recipe['category']
+            else:
+                cat = "misc"
+            recipes.setdefault(cat, []).append(recipe['name'])
+        return recipes
+
     def recipe_list(self):
-        recipes = [f"""<a href="{self.root}/calculate?{urllib.parse.quote(recipe)}=10">{recipe.capitalize().replace("_"," ")}</a>""" for recipe in self.recipes()]
-        return f"""<ul style="list-style-type:none;">
-                    {"".join("<li>" + recipe + "</li>" for recipe in recipes)}
-                   </ul>"""
+        html_str = """<dl style="list-style-type:none;">"""
+        for (cat, recipes) in sorted(self.recipes_cat().items()):
+            recipes.sort()
+            recipe_links = [f"""<a href="{self.root}/calculate?{urllib.parse.quote(recipe)}=10">{recipe.capitalize().replace("_"," ")}</a>""" for recipe in recipes]
+            html_str += f"<dt style=\"font-size:1.2em;padding-top:0.5em\"><strong>{cat.capitalize()}</strong></dt>"
+            html_str += "".join("<dd>" + recipe + "</dd>" for recipe in recipe_links)
+        return html_str + "</dl>"
 
     def recipe_options(self):
         return "".join(f"<option value=\"{recipe}\"> {recipe.capitalize()} </option>" for recipe in self.recipes())
@@ -147,8 +160,10 @@ class RecipePage(FettnapfPage):
 
     def create_recipes_form(self):
         html_string = f" <form action=\"{self.root}/request\" method=\"get\">"
-        for recipe in self.recipes():
-            html_string += f"""<p>
+        for (cat, recipes) in self.recipes_cat().items():
+            html_string += f"<h2>{cat.capitalize()}</h2>"
+            for recipe in recipes:
+                html_string += f"""<p>
                 <label for="{recipe}">
                  {recipe.capitalize()}:&ensp;
                 </label>
@@ -326,6 +341,8 @@ class AddRecipePage(FettnapfPage):
             mat_datalist += f"<option value=\"{material.capitalize()}\">{material.capitalize()}</option>\n"
         mat_datalist += "</datalist>"
 
+        categories = "".join("<option value=\"" + cat + "\">" + cat.capitalize() + " </option>" for cat in ["misc","hauptgericht","eintopf","süßkram","gebäck","salat","frühstück"])
+
         formentries = ""
         for i in range(self.n_ingredients):
             formentries += f"""
@@ -341,6 +358,10 @@ class AddRecipePage(FettnapfPage):
                  <input type="text" name="recipe_name" id="recipe_name"><br><br>
                  <label for="servings">Portionen:</label>
                  <input type="number" name="servings" id="servings"><br><br>
+                 <label for="category">Kategorie:</label>
+                 <select name="category" id="category" required style="display:inline">
+                  {categories}
+                 </select><br><br>
                  <fieldset>
                   <legend>Menge in kg - Zutaten:</legend>
                   {ing_datalist}
@@ -361,9 +382,9 @@ class AddRecipePage(FettnapfPage):
     def add_recipe(self, **kwargs):
         recipe_name = kwargs["recipe_name"]
         servings = kwargs["servings"]
+        category = kwargs["category"]
         instructions = kwargs["instructions"]
         materials = set(kwargs[f"material{n}"] for n in [1,2,3] if kwargs[f"material{n}"])
-        print(materials)
 
         if recipe_name == "":
             return error_page("Bitte gib deinem Rezept einen Namen.")
@@ -396,7 +417,7 @@ class AddRecipePage(FettnapfPage):
         else:
             return error_page("Dein Rezept hat keine Zutaten.")
 
-        recipe = Recipe(recipe_name, int(servings), ingredients_counter, instructions, materials)
+        recipe = Recipe(recipe_name, int(servings), ingredients_counter, instructions, materials, category)
 
         if db[self.user].search(Query().name == recipe_name):
             return self.error_page(f"Gibt schon ein Rezept für {recipe_name}, nimm einen anderen Namen.")
