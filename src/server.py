@@ -81,6 +81,9 @@ class FettnapfPage:
                     {"".join("<li>" + recipe + "</li>" for recipe in recipes)}
                    </ul>"""
 
+    def recipe_options(self):
+        return "".join(f"<option value=\"{recipe}\"> {recipe.capitalize()} </option>" for recipe in self.recipes())
+
     def plan_menu(self,menu):
         plan = planner.plan(menu)
     
@@ -287,7 +290,7 @@ class DeleteRecipePage(FettnapfPage):
                 <form action="delete_recipe" method="post">
                  <select name="recipe_name" id="select" required style="width:100%">
                   <option disabled selected value> -- Rezept zum löschen auswählen -- </option>
-                  {"".join("<option>" + recipe + "</option>" for recipe in self.recipes())}
+                  {self.recipe_options()}
                  </select>
                  <p><input type="submit" value="Wirklich löschen!"></p>
                  </form>
@@ -304,7 +307,7 @@ class DeleteRecipePage(FettnapfPage):
     def delete_recipe(self, **kwargs):
         recipe_name = kwargs["recipe_name"]
         db[self.user].remove(Query().name == recipe_name)
-        raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} gelöscht!"))
+        raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} gelöscht!"))
     
 class AddRecipePage(FettnapfPage):
     n_ingredients = 15
@@ -405,7 +408,7 @@ class EditRecipePage(FettnapfPage):
                    <form action="" method="post">
                     <select name="recipe_name" id="select" required style="width:100%">
                      <option disabled selected value> -- Rezept zum editieren auswählen -- </option>
-                     {"".join("<option>" + recipe + "</option>" for recipe in self.recipes())}
+                     {self.recipe_options()}
                     </select>
                     <p><input type="submit" value="Editieren!"></p>
                     </form>
