@@ -146,6 +146,7 @@ entries = [
     {"english": "black tea"                    , "category": "frühstück"   , "ingredient" : "schwarztee"                      },
     {"english": "herbal tea"                   , "category": "frühstück"   , "ingredient" : "kräutertee"                      },
     {"english": "jam"                          , "category": "frühstück"   , "ingredient" : "marmelade"                       },
+    {"english": "rose jam"                     , "category": "frühstück"   , "ingredient" : "rosenmarmelade"                  },
     {"english": "bread"                        , "category": "frühstück"   , "ingredient" : "brot"                            },
     {"english": "smoked tofu"                  , "category": "kühlware"    , "ingredient" : "räuchertofu"                     },
     {"english": "sausages"                     , "category": "kühlware"    , "ingredient" : "würstchen"                       },
