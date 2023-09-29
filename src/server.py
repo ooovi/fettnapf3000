@@ -16,7 +16,8 @@ import json
 import string
 from collections import Counter
 
-db = {"team":tinydb.TinyDB(f'../recipes/team_recipes.json'), "food4action":tinydb.TinyDB(f'../recipes/food4action_recipes.json')}
+db = {"team":tinydb.TinyDB(f'../../fettnapf3000recipes/team_recipes.json'),
+      "food4action":tinydb.TinyDB(f'../../fettnapf3000recipes/food4action_recipes.json')}
 
 class FettnapfPage:
     def __init__(self, user="team", add_footer=True):
