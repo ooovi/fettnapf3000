@@ -6,7 +6,7 @@ class Recipe:
         self.n_servings = n_servings
         self.ingredients = [(section, Counter({i.lower() : c for (i,c) in ings.items()})) for (section, ings) in ingredients]
         self.instructions = instructions
-        self.materials = materials
+        self.materials = set(material.lower() for material in materials)
         self.total_weight = round(sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in self.ingredients])/n_servings,3)
 
     def scaled_ingredients(self, n_servings: float) -> Counter:

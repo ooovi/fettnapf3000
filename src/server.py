@@ -315,10 +315,16 @@ class AddRecipePage(FettnapfPage):
     @cherrypy.expose
     def index(self):
         ingredients = [entry["ingredient"] for entry in metrodb.search(Query().ingredient.exists())]
-        datalist = "<datalist id=\"ingredients\">\n"
+        ing_datalist = "<datalist id=\"ingredients\">\n"
         for ingredient in ingredients:
-            datalist += f"<option value=\"{ingredient.capitalize()}\">{ingredient.capitalize()}</option>\n"
-        datalist += "</datalist>"
+            ing_datalist += f"<option value=\"{ingredient.capitalize()}\">{ingredient.capitalize()}</option>\n"
+        ing_datalist += "</datalist>"
+
+        materials = set().union(*[set(entry["materials"]) for entry in db[self.user].search(Query().materials.exists())])
+        mat_datalist = "<datalist id=\"materials\">\n"
+        for material in materials:
+            mat_datalist += f"<option value=\"{material.capitalize()}\">{material.capitalize()}</option>\n"
+        mat_datalist += "</datalist>"
 
         formentries = ""
         for i in range(self.n_ingredients):
@@ -337,13 +343,16 @@ class AddRecipePage(FettnapfPage):
                  <input type="number" name="servings" id="servings"><br><br>
                  <fieldset>
                   <legend>Menge in kg - Zutaten:</legend>
-                  {datalist}
+                  {ing_datalist}
                   {formentries}
                  </fieldset><br><br>
                  <label for="instructions">Anleitung (optional):</label>
                  <textarea name="instructions" id="instructions" style="height:15em;"></textarea><br>
-                 <label for="materials">Besonderes Equipment (optional):</label>
-                 <textarea name="materials" id="materials"></textarea><br><br>
+                 <label>Besonderes Equipment (optional):</label>
+                 {mat_datalist}
+                 <input type="text" name="material1" id="material1" style="width:100%" list="materials"><br>
+                 <input type="text" name="material2" id="material2" style="width:100%" list="materials"><br>
+                 <input type="text" name="material3" id="material3" style="width:100%" list="materials"><br>
                  <p><input type="submit" value="Rezept hinzufügen"></p>
                 </form>
             """)
@@ -353,7 +362,8 @@ class AddRecipePage(FettnapfPage):
         recipe_name = kwargs["recipe_name"]
         servings = kwargs["servings"]
         instructions = kwargs["instructions"]
-        materials = kwargs["materials"]
+        materials = set(kwargs[f"material{n}"] for n in [1,2,3] if kwargs[f"material{n}"])
+        print(materials)
 
         if recipe_name == "":
             return error_page("Bitte gib deinem Rezept einen Namen.")
@@ -365,7 +375,7 @@ class AddRecipePage(FettnapfPage):
         allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + ".,äöüÄÖÜß !?€\"\'\n\r")
         if not set(instructions).issubset(allowed):
             return error_page("Anleitung darf nur Buchstaben, Zahlen, Punkt und Komma enthalten!")
-        if not set(materials).issubset(allowed):
+        if not set("".join(materials)).issubset(allowed):
             return error_page("Materialliste darf nur Buchstaben, Zahlen, Punkt und Komma enthalten!")
 
 
@@ -385,11 +395,6 @@ class AddRecipePage(FettnapfPage):
                                                 for (ingredient, amount) in ingredient_list}))]
         else:
             return error_page("Dein Rezept hat keine Zutaten.")
-
-        if materials:
-            materials = set(materials.split(","))
-        else:
-            materials = set()
 
         recipe = Recipe(recipe_name, int(servings), ingredients_counter, instructions, materials)
 
