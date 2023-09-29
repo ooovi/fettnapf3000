@@ -4,7 +4,7 @@ class Recipe:
     def __init__(self, name: str, n_servings: int, ingredients: [(str,Counter)], instructions: str, materials: set[str]):
         self.name = name.lower()
         self.n_servings = n_servings
-        self.ingredients = ingredients
+        self.ingredients = [(section, Counter({i.lower() : c for (i,c) in ings.items()})) for (section, ings) in ingredients]
         self.instructions = instructions
         self.materials = materials
         self.total_weight = round(sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in self.ingredients])/n_servings,3)
