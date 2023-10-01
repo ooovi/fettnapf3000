@@ -51,7 +51,7 @@ def recipe_string(recipe: Recipe, n_servings=None, pretty=False) -> str:
         recipe_str += f"\nGewicht pro Portion: {recipe.total_weight:g} kg\n"
 
     else: # just make a human readable string
-        recipe_str += "Kategorie: " + recipe.category + "\n\n"
+        recipe_str += "Kategorie: " + recipe.category.capitalize() + "\n"
         recipe_str += "\n### Zutaten\n"
         for (subsection, scaled_ingredients) in scaled_recipe:
             if subsection != "":

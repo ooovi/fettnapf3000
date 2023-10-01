@@ -1,23 +1,23 @@
 import sys
-import os, os.path
-import tinydb
+import os
+import urllib.parse
+import json
+import string
+from random import choice
+from collections import Counter
+
+from tinydb import Query, TinyDB
 import cherrypy
-from cherrypy.lib import auth_digest
 import markdown
 import pymdownx
+
 import planner
 import parser
 from recipe import Recipe, recipe_string, recipe_dict
 from metrodb import metrodb
-from random import choice
-import urllib.parse
-from tinydb import Query
-import json
-import string
-from collections import Counter
 
-db = {"team":tinydb.TinyDB(f'../../fettnapf3000recipes/team_recipes.json'),
-      "food4action":tinydb.TinyDB(f'../../fettnapf3000recipes/food4action_recipes.json')}
+db = {"team": TinyDB(f'../../fettnapf3000recipes/team_recipes.json', indent=2),
+      "food4action": TinyDB(f'../../fettnapf3000recipes/food4action_recipes.json', indent=2)}
 
 class FettnapfPage:
     def __init__(self, user="team", add_footer=True):
@@ -527,14 +527,14 @@ if __name__ == '__main__':
         '/repertoire': {
             'tools.auth_digest.on': True,
             'tools.auth_digest.realm': 'localhost',
-            'tools.auth_digest.get_ha1': auth_digest.get_ha1_dict_plain(TEAM_USERS),
+            'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_dict_plain(TEAM_USERS),
             'tools.auth_digest.key': KEY,
             'tools.auth_digest.accept_charset': 'UTF-8',
          },
          '/food4action/repertoire': {
             'tools.auth_digest.on': True,
             'tools.auth_digest.realm': 'localhost',
-            'tools.auth_digest.get_ha1': auth_digest.get_ha1_dict_plain(F4A_USERS),
+            'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_dict_plain(F4A_USERS),
             'tools.auth_digest.key': KEY,
             'tools.auth_digest.accept_charset': 'UTF-8',
          }

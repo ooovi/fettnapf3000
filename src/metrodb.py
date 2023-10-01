@@ -73,6 +73,7 @@ entries = [
     {"english": "leek"                         , "category": "gemüse/obst" , "ingredient" : "lauch"                           },
     {"english": "beetroot (fresh)"             , "category": "gemüse/obst" , "ingredient" : "rote beete (roh)"                },
     {"english": "canned tomatos (chopped)"     , "category": "dosen"       , "ingredient" : "dosentomaten (gehackt)"          },
+    {"english": "canned tomatos (whole)"       , "category": "dosen"       , "ingredient" : "dosentomaten (ganz)"             },
     {"english": "canned tomatos (paste)"       , "category": "dosen"       , "ingredient" : "dosentomaten (passiert)"         },
     {"english": "tomato concentrate"           , "category": "dosen"       , "ingredient" : "tomatenmark"                     },
     {"english": "pickled cucumber"             , "category": "dosen"       , "ingredient" : "saure gurken"                    },
