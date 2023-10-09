@@ -361,13 +361,14 @@ class AddRecipePage(FettnapfPage):
                 </p>
                 <form action="add_recipe" method="post">
                  <label for="recipe_name">Rezeptname:</label>
-                 <input type="text" name="recipe_name" id="recipe_name"><br><br>
-                 <label for="servings">Portionen:</label>
-                 <input type="number" name="servings" id="servings"><br><br>
+                 <input type="text" name="recipe_name" id="recipe_name" required><br><br>
                  <label for="category">Kategorie:</label>
                  <select name="category" id="category" required style="display:inline">
+                  <option disabled selected value> -- Kategorie auswählen -- </option>
                   {categories}
                  </select><br><br>
+                 <label for="servings">Portionen:</label>
+                 <input type="number" name="servings" id="servings" required><br><br>
                  <fieldset>
                   <legend>Menge in kg - Zutaten:</legend>
                   {ing_datalist}
@@ -392,18 +393,14 @@ class AddRecipePage(FettnapfPage):
         instructions = kwargs["instructions"]
         materials = set(kwargs[f"material{n}"] for n in [1,2,3] if kwargs[f"material{n}"])
 
-        if recipe_name == "":
-            return error_page("Bitte gib deinem Rezept einen Namen.")
         if not recipe_name.replace(" ","").isalpha():
-            return error_page("Nur Buchstaben im Rezeptnamen bitte.")
-        if servings == "":
-            return error_page("Bitte gib die Anzahl Portionen an.")
+            return self.error_page("Nur Buchstaben im Rezeptnamen bitte.")
 
-        allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + ".,äöüÄÖÜß !?€\"\'\n\r")
+        allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + ".,äöüÄÖÜß !?€-/\"\'\n\r")
         if not set(instructions).issubset(allowed):
-            return error_page("Anleitung darf nur Buchstaben, Zahlen, Punkt und Komma enthalten!")
+            return self.error_page("Anleitung darf nur Buchstaben, Zahlen, Punkt und Komma enthalten!")
         if not set("".join(materials)).issubset(allowed):
-            return error_page("Materialliste darf nur Buchstaben, Zahlen, Punkt und Komma enthalten!")
+            return self.error_page("Materialliste darf nur Buchstaben, Zahlen, Punkt und Komma enthalten!")
 
 
         ingredient_list = []
@@ -421,7 +418,7 @@ class AddRecipePage(FettnapfPage):
             ingredients_counter = [("", Counter({ingredient: amount
                                                 for (ingredient, amount) in ingredient_list}))]
         else:
-            return error_page("Dein Rezept hat keine Zutaten.")
+            return self.error_page("Dein Rezept hat keine Zutaten.")
 
         recipe = Recipe(recipe_name, int(servings), ingredients_counter, instructions, materials, category)
 
