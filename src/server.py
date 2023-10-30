@@ -103,19 +103,30 @@ class FettnapfPage:
     def recipe_options(self):
         return "".join(f"<option value=\"{recipe}\"> {recipe.capitalize()} </option>" for recipe in self.recipes())
 
-    def plan_menu(self,menu):
+    def plan_menu(self,menu,md=""):
         plan = planner.plan(menu)
     
         extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
         plan_html = markdown.markdown(plan,
             extensions=['tables','pymdownx.tasklist'],
             extension_configs=extension_configs)
-    
-        return self.html_body("calculate",
-            f"""<p style="font-size:5em; text-align:center;">
+
+        if md:
+            moji = f"""
+                       <a>
+                        {randomoji_link(self.root + "/menu/?menu=" + urllib.parse.quote(md))}
+                       </a>
+                    """
+        else:
+            moji = f"""
                  <a onclick="window.print();" style="text-decoration: none">
                   {randomoji()}
                  </a>
+            """
+
+        return self.html_body("calculate",
+            f"""<p style="font-size:5em; text-align:center;">
+                 {moji}
                 </p>
                 {plan_html}
                 <hr>
@@ -180,7 +191,11 @@ class RecipePage(FettnapfPage):
 
 class MenuPage(FettnapfPage):
     @cherrypy.expose
-    def index(self):
+    def index(self, **kwargs):
+        menu = ""
+        if kwargs:
+            menu = kwargs.get("menu")
+
         return self.html_body("menu",
             f"""{randomoji_link(self.root + "/")}
                 <strong>Gib ein Menü in diesem Format an:</strong>
@@ -198,7 +213,7 @@ class MenuPage(FettnapfPage):
                 Die Namen der Gerichte müssen genau der Liste unten entsprechen!<br>
                 Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen, oder drucke die Seite aus.
                 <form action="{self.root}/calculate_menu" method="get" >
-                 <textarea name="menu"></textarea><br>
+                 # <textarea name="menu">{menu}</textarea><br>
                  <p><input type="submit" value="Kalkulation"></p>
                 </form>
                <h1>Rezepte</h1>
@@ -232,7 +247,7 @@ class CalculateMenuPage(FettnapfPage):
                  menu[category].append((recipe, n_servings))
              else:
                  menu[category] = [(recipe, n_servings)]
-        return self.plan_menu(menu)
+        return self.plan_menu(menu, md = menu_md)
 
 
 
@@ -423,10 +438,10 @@ class AddRecipePage(FettnapfPage):
         recipe = Recipe(recipe_name, int(servings), ingredients_counter, instructions, materials, category)
 
         if db[self.user].search(Query().name == recipe_name):
-            return self.error_page(f"Gibt schon ein Rezept für {recipe_name}, nimm einen anderen Namen.")
+            return self.error_page(f"Gibt schon ein Rezept für {recipe_name.capitalize()}, nimm einen anderen Namen.")
         else:
             db[self.user].insert(recipe_dict(recipe))
-            raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name} hinzugefügt!"))
+            raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} hinzugefügt!"))
 
 class EditRecipePage(FettnapfPage):
     @cherrypy.expose
@@ -494,7 +509,7 @@ Stabmixer
 
         new_recipe_name = recipe.name
         if not(recipe_name == new_recipe_name) and db[self.user].search(Query().name == new_recipe_name ):
-            return self.error_page(f"Gibt schon ein Rezept für {new_recipe_name}, nimm einen anderen Namen.")
+            return self.error_page(f"Gibt schon ein Rezept für {new_recipe_name.capitalize()}, nimm einen anderen Namen.")
         else:
             db[self.user].remove(Query().name == recipe_name)
             db[self.user].insert(recipe_dict(recipe))
