@@ -213,7 +213,7 @@ class MenuPage(FettnapfPage):
                 Die Namen der Gerichte müssen genau der Liste unten entsprechen!<br>
                 Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen, oder drucke die Seite aus.
                 <form action="{self.root}/calculate_menu" method="get" >
-                 # <textarea name="menu">{menu}</textarea><br>
+                 <textarea name="menu">{menu}</textarea><br>
                  <p><input type="submit" value="Kalkulation"></p>
                 </form>
                <h1>Rezepte</h1>

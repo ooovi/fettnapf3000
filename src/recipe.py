@@ -1,4 +1,6 @@
 from collections import Counter
+from tinydb import Query
+from metrodb import metrodb
 
 class Recipe:
     def __init__(self, name: str, n_servings: int, ingredients: [(str,Counter)], instructions: str, materials: set[str], category="misc"):
@@ -9,6 +11,21 @@ class Recipe:
         self.materials = set(material.lower() for material in materials)
         self.category = category.lower()
         self.total_weight = round(sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in self.ingredients])/n_servings,3)
+
+        allergens = []
+        User = Query()
+        print(ingredients)
+        for (section, ings) in ingredients:
+           for (ing, s) in ings.items():
+              print(ing)
+              db_entries = metrodb.search(User.ingredient == ing)
+              if db_entries:
+                  ing_allergens = db_entries[0]["allergens"]
+                  for allergen in ing_allergens:
+                      if not (allergen in allergens):
+                          allergens.append(allergen) if allergen not in allergens else allergens
+        allergens.sort()
+        self.allergens = allergens
 
     def scaled_ingredients(self, n_servings: float) -> Counter:
         scaled = []
@@ -35,6 +52,8 @@ def recipe_string(recipe: Recipe, n_servings=None, pretty=False) -> str:
     # name header
     recipe_str = f"\n## {recipe.name.capitalize()}\n{n_servings:g} Portionen\n"
 
+    recipe_str += f"\nAllergene: " + ", ".join([allergen.capitalize() for allergen in recipe.allergens]) + "\n"
+    
     if pretty: # make a pretty table
         recipe_str += "\n"
         for (subsection, scaled_ingredients) in scaled_recipe:
