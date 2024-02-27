@@ -52,7 +52,8 @@ def recipe_string(recipe: Recipe, n_servings=None, pretty=False) -> str:
     # name header
     recipe_str = f"\n## {recipe.name.capitalize()}\n{n_servings:g} Portionen\n"
 
-    recipe_str += f"\nAllergene: " + ", ".join([allergen.capitalize() for allergen in recipe.allergens]) + "\n"
+    if pretty: # print allergens
+        recipe_str += f"\nAllergene: " + ", ".join([allergen.capitalize() for allergen in recipe.allergens]) + "\n"
     
     if pretty: # make a pretty table
         recipe_str += "\n"
