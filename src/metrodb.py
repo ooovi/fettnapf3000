@@ -132,6 +132,7 @@ entries = [
     {"english": "couscous"                     , "category": "trockenware" , "ingredient" : "couscous"                         , "allergens" : ["gluten"]},
     {"english": "grünkern"                     , "category": "trockenware" , "ingredient" : "grünkern"                         , "allergens" : ["gluten"]},
     {"english": "basmati"                      , "category": "trockenware" , "ingredient" : "basmati"                          , "allergens" : []},
+    {"english": "short grain rice"             , "category": "trockenware" , "ingredient" : "milchreis"                        , "allergens" : []},
     {"english": "brown lentils"                , "category": "trockenware" , "ingredient" : "braune linsen (tellerlinsen)"     , "allergens" : []},
     {"english": "red lentils"                  , "category": "trockenware" , "ingredient" : "rote linsen"                      , "allergens" : []},
     {"english": "sunflower seeds"              , "category": "trockenware" , "ingredient" : "sonnenblumenkerne"                , "allergens" : []},
