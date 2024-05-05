@@ -103,7 +103,28 @@ class FettnapfPage:
     def recipe_options(self):
         return "".join(f"<option value=\"{recipe}\"> {recipe.capitalize()} </option>" for recipe in self.recipes())
 
-    def plan_menu(self,menu,md=""):
+    def plan_menu(self, menu_md):
+        try:
+            menu_list = parser.parse_menu(menu_md)
+        except parser.ParseError as e:
+            return self.error_page(f"""<strong>Dein Menü ist nicht im richtigen Format!</strong><br>
+                        Geh zurück und schau es dir nochmal an. Der Fehler:<br>
+                        <div>{e}</div>
+                     """)
+        menu = {}
+        for (category, recipe_name, n_servings) in menu_list:
+             recipe_entries = db[self.user].search(Query().name == recipe_name)
+             if recipe_entries:
+                 recipe = Recipe.from_document(recipe_entries[0])
+             else:
+                 return self.error_page(f"""<strong>Das Rezept {recipe_name.capitalize().replace("_"," ")} steht nicht in der Liste!</strong><br>
+                        Geh zurück und schau es dir nochmal an.
+                     """)
+             if category in menu:
+                 menu[category].append((recipe, n_servings))
+             else:
+                 menu[category] = [(recipe, n_servings)]
+
         plan = planner.plan(menu)
     
         extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
@@ -111,29 +132,19 @@ class FettnapfPage:
             extensions=['tables','pymdownx.tasklist'],
             extension_configs=extension_configs)
 
-        if md:
-            moji = f"""
-                       <a>
-                        {randomoji_link(self.root + "/menu/?menu=" + urllib.parse.quote(md))}
-                       </a>
-                    """
-        else:
-            moji = f"""
-                 <a onclick="window.print();" style="text-decoration: none">
-                  {randomoji()}
-                 </a>
-            """
+        moji = randomoji_control(self.root + "/menu/?menu=" + urllib.parse.quote(menu_md), "editieren")
 
         return self.html_body("calculate",
-            f"""<p style="font-size:5em; text-align:center;">
-                 {moji}
-                </p>
+            f"""{moji}
                 {plan_html}
                 <hr>
                 <div style="text-align: center;">
                  Rezepte können Spuren von Tipp- und Denkfehlern enthalten.
                  Wenn du welche findest, mail an fettnapf3000 ät posteo punkt de</a>!
-                </div>
+<!-- Email (subject, body) -->
+<a href="mailto:?subject=<SUBJECT>&body=<BODY>">
+    Email
+</a>                </div>
             """)
 
 
@@ -161,6 +172,14 @@ def randomoji_link(ref):
            <p style="font-size:5em; text-align:center;">
             <a href="{ref}" style="text-decoration: none">
              {randomoji()}
+            </a></p>"""
+
+def randomoji_control(ref, control):
+    return f"""
+           <p style="font-size:5em; text-align:center;">
+            <a href="{ref}" style="text-decoration: none">
+             <span class="emoji">{randomoji()}</span>
+             <span class="control">{control}</span>
             </a></p>"""
 
 class RecipePage(FettnapfPage):
@@ -201,14 +220,14 @@ class MenuPage(FettnapfPage):
                 <strong>Gib ein Menü in diesem Format an:</strong>
                 <div><pre>
 ### Montag
-1 Supershake
+1 Super shake
 
 ### Dienstag
-1 Supershake
+1 Super shake
 
 ### Rest der Woche
 100 Kaffe
-100 Kürbisschnecken
+100 Kürbisschnecken mit orangenbutter
                 </pre></div>
                 Die Namen der Gerichte müssen genau der Liste unten entsprechen!<br>
                 Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen, oder drucke die Seite aus.
@@ -226,30 +245,7 @@ class CalculateMenuPage(FettnapfPage):
 
     @cherrypy.expose
     def index(self, **kwargs):
-        menu_md = kwargs.get("menu")
-        try:
-            menu_list = parser.parse_menu(menu_md)
-        except parser.ParseError as e:
-            return self.error_page(f"""<strong>Dein Menü ist nicht im richtigen Format!</strong><br>
-                        Geh zurück und schau es dir nochmal an. Der Fehler:<br>
-                        <div>{e}</div>
-                     """)
-        menu = {}
-        for (category, recipe_name, n_servings) in menu_list:
-             recipe_entries = db[self.user].search(Query().name == recipe_name)
-             if recipe_entries:
-                 recipe = Recipe.from_document(recipe_entries[0])
-             else:
-                 return self.error_page(f"""<strong>Das Rezept {recipe_name.capitalize().replace("_"," ")} steht nicht in der Liste!</strong><br>
-                        Geh zurück und schau es dir nochmal an.
-                     """)
-             if category in menu:
-                 menu[category].append((recipe, n_servings))
-             else:
-                 menu[category] = [(recipe, n_servings)]
-        return self.plan_menu(menu, md = menu_md)
-
-
+        return self.plan_menu(kwargs.get("menu"))
 
 class RequestPage(FettnapfPage):
     @cherrypy.expose
@@ -269,23 +265,7 @@ class CalculatePage(FettnapfPage):
         if not kwargs:
             raise cherrypy.HTTPRedirect(f"/{self.root}")
 
-        menu = {}
-        for (recipe_name, n) in kwargs.items():
-            if n:
-                recipe_entries = db[self.user].search(Query().name == recipe_name)
-                if recipe_entries:
-                    recipe = Recipe.from_document(recipe_entries[0])
-                else:
-                    return self.error_page(f"""<strong>Das Rezept {recipe_name.capitalize().replace("_"," ")} steht nicht in der Liste!</strong><br>
-                           Geh zurück und schau es dir nochmal an.
-                        """)
-                n_servings = int(n)
-                if "Rezepte" in menu:
-                     menu["Rezepte"].append((recipe, n_servings))
-                else:
-                     menu["Rezepte"] = [(recipe, n_servings)]
-
-        return self.plan_menu(menu)
+        return self.plan_menu("### Rezepte\n" + "\n".join(f"{n} {recipe_name}" for (recipe_name, n) in kwargs.items()))
 
 class RepertoirePage(FettnapfPage):
     def __init__(self, user="team"):
@@ -362,7 +342,7 @@ class AddRecipePage(FettnapfPage):
             mat_datalist += f"<option value=\"{material.capitalize()}\">{material.capitalize()}</option>\n"
         mat_datalist += "</datalist>"
 
-        categories = "".join("<option value=\"" + cat + "\">" + cat.capitalize() + " </option>" for cat in ["misc","hauptgericht","eintopf","süßkram","gebäck","salat","frühstück"])
+        categories = "".join(set("<option value=\"" + cat["category"] + "\">" + cat["category"].capitalize() + " </option>" for cat in db[self.user].search(Query().category.exists())))
 
         formentries = ""
         for i in range(self.n_ingredients):

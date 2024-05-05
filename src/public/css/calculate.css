@@ -19,6 +19,18 @@ h1 {
   padding-top: 3em;
 }
 
+a .control {
+  display: none;
+}
+
+a:hover .emoji {
+  display: none;
+}
+
+a:hover .control {
+  display: inline;
+}
+
 table {
   border-collapse: collapse;
   margin-bottom: 2em;
