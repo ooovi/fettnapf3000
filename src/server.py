@@ -141,10 +141,7 @@ class FettnapfPage:
                 <div style="text-align: center;">
                  Rezepte können Spuren von Tipp- und Denkfehlern enthalten.
                  Wenn du welche findest, mail an fettnapf3000 ät posteo punkt de</a>!
-<!-- Email (subject, body) -->
-<a href="mailto:?subject=<SUBJECT>&body=<BODY>">
-    Email
-</a>                </div>
+                </div>
             """)
 
 
