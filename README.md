@@ -6,7 +6,7 @@ A tool for planning almost-arbitrary-scale cooking activities. Can generate a me
 - [python](https://www.python.org/) >= 3.9
 - the [pyparsing](https://pypi.org/project/pyparsing/) python package
 - the [tinydb](https://pypi.org/project/tinydb/) python package
-- the [tinydb](https://pypi.org/project/CherryPy/) python package for the web interface
+- the [CherryPy](https://pypi.org/project/CherryPy/) python package for the web interface
 - [pypandoc](https://pypi.org/project/pypandoc/) for pdf export
 
 ## Usage
