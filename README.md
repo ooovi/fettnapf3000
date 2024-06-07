@@ -12,7 +12,7 @@ A tool for planning almost-arbitrary-scale cooking activities. Can generate a me
 ## Usage
 ### Web interface (recommended)
 
-We host an instance with our recipes [here](teamgeil.uber.space).
+We host an instance with our recipes [here](https://teamgeil.uber.space).
 
 To start a local server serving the fettnapf at port 8000, navigate to the `src` directory and run
 ```python
