@@ -17,20 +17,20 @@ from recipe import Recipe, recipe_string, recipe_dict
 from metrodb import metrodb
 
 db = {"team": TinyDB(f'../../fettnapf3000recipes/team_recipes.json', indent=2),
-      "food4action": TinyDB(f'../../fettnapf3000recipes/food4action_recipes.json', indent=2)}
+      "food4action": TinyDB(f'../../fettnapf3000recipes/food4action_recipes.json', indent=2),
+      "cutiemeow": TinyDB(f'../../fettnapf3000recipes/cutiemeow_recipes.json', indent=2)}
 
 class FettnapfPage:
-    def __init__(self, user="team", add_footer=True):
-        self.add_footer = add_footer
+    def __init__(self, user="team"):
         self.user = user
         if not user == "team":
             self.root = "/" + user
         else:
             self.root = ""
 
-    def html_body(self, css, body):
+    def html_body(self, css, body, add_footer=True):
         footer = ""
-        if self.add_footer:
+        if add_footer:
             footer = f"""
                      <hr>
                      <nav style="text-align:center;">
@@ -142,7 +142,7 @@ class FettnapfPage:
                  Rezepte können Spuren von Tipp- und Denkfehlern enthalten.
                  Wenn du welche findest, mail an fettnapf3000 ät posteo punkt de</a>!
                 </div>
-            """)
+            """, False)
 
 
 def randomoji():
@@ -205,9 +205,8 @@ class RecipePage(FettnapfPage):
         html_string += """<p><input type="submit" value="Kalkulation"></p></form>"""
         return html_string
 
-class MenuPage(FettnapfPage):
     @cherrypy.expose
-    def index(self, **kwargs):
+    def menu(self, **kwargs):
         menu = ""
         if kwargs:
             menu = kwargs.get("menu")
@@ -235,39 +234,28 @@ class MenuPage(FettnapfPage):
                <h1>Rezepte</h1>
                {self.recipe_list()}
             """)
-
-class CalculateMenuPage(FettnapfPage):
-    def __init__(self, user="team"):
-        FettnapfPage.__init__(self, user, False)
-
+    
     @cherrypy.expose
-    def index(self, **kwargs):
+    def calculate_menu(self, **kwargs):
         return self.plan_menu(kwargs.get("menu"))
 
-class RequestPage(FettnapfPage):
     @cherrypy.expose
-    def index(self, **kwargs):
+    def request(self, **kwargs):
         # clean empty form entries from url
         clean_request = { (r,n) for (r,n) in kwargs.items() if n }
         raise cherrypy.HTTPRedirect(
             f"{self.root}/calculate/?" + '&'.join(f"{urllib.parse.quote(r)}={n}" for (r,n) in clean_request)
         )
 
-class CalculatePage(FettnapfPage):
-    def __init__(self, user="team"):
-        FettnapfPage.__init__(self, user, False)
-
     @cherrypy.expose
-    def index(self, **kwargs):
+    def calculate(self, **kwargs):
         if not kwargs:
             raise cherrypy.HTTPRedirect(f"/{self.root}")
 
         return self.plan_menu("### Rezepte\n" + "\n".join(f"{n} {recipe_name}" for (recipe_name, n) in kwargs.items()))
 
 class RepertoirePage(FettnapfPage):
-    def __init__(self, user="team"):
-        FettnapfPage.__init__(self, user, False)
-    add_footer = False
+    # a page for repertoire management
     @cherrypy.expose
     def index(self, **kwargs):
         text = ""
@@ -295,9 +283,8 @@ class RepertoirePage(FettnapfPage):
                 {self.recipe_list(True)}
             """)
 
-class DeleteRecipePage(FettnapfPage):
     @cherrypy.expose
-    def index(self):
+    def delete(self):
         return self.html_body("repertoire",
             f"""{randomoji_link(".")}
                 <form action="delete_recipe" method="post">
@@ -322,11 +309,11 @@ class DeleteRecipePage(FettnapfPage):
         db[self.user].remove(Query().name == recipe_name)
         raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} gelöscht!"))
     
-class AddRecipePage(FettnapfPage):
-    n_ingredients = 15
-
     @cherrypy.expose
-    def index(self):
+    def add(self):
+        
+        n_ingredients = 15
+        
         ingredients = [entry["ingredient"] for entry in metrodb.search(Query().ingredient.exists())]
         ing_datalist = "<datalist id=\"ingredients\">\n"
         for ingredient in ingredients:
@@ -342,7 +329,7 @@ class AddRecipePage(FettnapfPage):
         categories = "".join(set("<option value=\"" + cat["category"] + "\">" + cat["category"].capitalize() + " </option>" for cat in db[self.user].search(Query().category.exists())))
 
         formentries = ""
-        for i in range(self.n_ingredients):
+        for i in range(n_ingredients):
             formentries += f"""
                            <input type="number" step="0.001" name="amount{i}" id="amount{i}">
                            <input type="text" name="ingredient{i}" id="ingredient{i}" list="ingredients">
@@ -379,6 +366,7 @@ class AddRecipePage(FettnapfPage):
 
     @cherrypy.expose
     def add_recipe(self, **kwargs):
+        n_ingredients = 15
         recipe_name = kwargs["recipe_name"]
         servings = kwargs["servings"]
         category = kwargs["category"]
@@ -396,7 +384,7 @@ class AddRecipePage(FettnapfPage):
 
 
         ingredient_list = []
-        for i in range(self.n_ingredients):
+        for i in range(n_ingredients):
             ingredient = kwargs[f"ingredient{i}"]
             if ingredient:
                 amount = kwargs[f"amount{i}"]
@@ -420,9 +408,8 @@ class AddRecipePage(FettnapfPage):
             db[self.user].insert(recipe_dict(recipe))
             raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} hinzugefügt!"))
 
-class EditRecipePage(FettnapfPage):
     @cherrypy.expose
-    def index(self, **kwargs):
+    def edit(self, **kwargs):
         if not kwargs:
            return self.html_body("repertoire",
                f"""{randomoji_link(".")}
@@ -493,8 +480,10 @@ Stabmixer
 
             raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} editiert!"))
 
+
 TEAM_USERS = json.load(open("users.txt"))
 F4A_USERS = json.load(open("f4a_users.txt"))
+CUTIEMEOW_USERS = json.load(open("cutiemeow_users.txt"))
 KEY = open("key.txt").read()
 
 if __name__ == '__main__':
@@ -526,30 +515,24 @@ if __name__ == '__main__':
             'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_dict_plain(F4A_USERS),
             'tools.auth_digest.key': KEY,
             'tools.auth_digest.accept_charset': 'UTF-8',
+         },
+         '/cutiemeow/repertoire': {
+            'tools.auth_digest.on': True,
+            'tools.auth_digest.realm': 'localhost',
+            'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_dict_plain(CUTIEMEOW_USERS),
+            'tools.auth_digest.key': KEY,
+            'tools.auth_digest.accept_charset': 'UTF-8',
          }
     }
 
     root = RecipePage()
     root.team = RecipePage("team")
-    root.request = RequestPage()
-    root.menu = MenuPage()
-    root.calculate_menu = CalculateMenuPage()
-    root.calculate = CalculatePage()
-
     root.repertoire = RepertoirePage()
-    root.repertoire.add = AddRecipePage()
-    root.repertoire.edit = EditRecipePage()
-    root.repertoire.delete = DeleteRecipePage()
 
     root.food4action = RecipePage("food4action")
-    root.food4action.request = RequestPage("food4action")
-    root.food4action.menu = MenuPage("food4action")
-    root.food4action.calculate_menu = CalculateMenuPage("food4action")
-    root.food4action.calculate = CalculatePage("food4action")
-
     root.food4action.repertoire = RepertoirePage("food4action")
-    root.food4action.repertoire.add = AddRecipePage("food4action")
-    root.food4action.repertoire.edit = EditRecipePage("food4action")
-    root.food4action.repertoire.delete = DeleteRecipePage("food4action")
+
+    root.cutiemeow = RecipePage("cutiemeow")
+    root.cutiemeow.repertoire = RepertoirePage("cutiemeow")
 
     cherrypy.quickstart(root, config = conf)
