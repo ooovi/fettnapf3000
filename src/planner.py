@@ -1,8 +1,33 @@
 from collections import Counter
-from tinydb import Query
-from metrodb import metrodb, cat_sort
+from tinydb import TinyDB, Query
 from recipe import Recipe, recipe_string
-    
+
+# ingredient database
+metrodb = TinyDB('../../fettnapf3000recipes/metrodb.json', indent=2)
+
+
+# sort the categories like they are arranged in the wholesale
+def cat_sort(cat: str):
+    categories = {
+      "hygiene"     : 1,
+      "getränke"    : 2,
+      "gemüse/obst" : 3,
+      "baking"      : 4,
+      "gewürze/öl"  : 5,
+      "oils"        : 6,
+      "cans"        : 7,
+      "trockenware" : 8,
+      "kühlware"    : 9,
+      "frühstück"   : 10,
+      "snacks"      : 11,
+      "nometro"     : 100,
+    }
+    if cat in categories:
+        return categories[cat]
+    else:
+        return 0
+
+
 # given a dict {sections -> (recipe, n_servings)}, compute:
 #   - a menu overview markdown string
 #   - the total weight of all ingredients

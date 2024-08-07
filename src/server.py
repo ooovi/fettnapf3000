@@ -13,12 +13,14 @@ import pymdownx
 
 import planner
 import parser
-from recipe import Recipe, recipe_string, recipe_dict
-from metrodb import metrodb
+from recipe import Recipe, recipe_string,recipe_dict
 
 db = {"team": TinyDB(f'../../fettnapf3000recipes/team_recipes.json', indent=2),
       "food4action": TinyDB(f'../../fettnapf3000recipes/food4action_recipes.json', indent=2),
       "cutiemeow": TinyDB(f'../../fettnapf3000recipes/cutiemeow_recipes.json', indent=2)}
+
+metrodb = TinyDB('../../fettnapf3000recipes/metrodb.json', indent=2)
+
 
 class FettnapfPage:
     def __init__(self, user="team"):
@@ -179,6 +181,32 @@ def randomoji_control(ref, control):
              <span class="control">{control}</span>
             </a></p>"""
 
+def options(input_list):
+    return "".join(f"<option value=\"{input}\"> {input.capitalize()} </option>" for input in input_list)
+
+def datalist(id, input_list, selected = []):
+    datalist = "<datalist id=\"" + id + "\">\n"
+    for input in input_list:
+        s = "selected" if input in selected else ""
+        datalist += f"<option {s} value=\"{input.capitalize()}\">{input.capitalize()}</option>\n"
+    datalist += "</datalist>"
+    return datalist
+
+def ingredients_list():
+    ingredients = [ing["ingredient"] for ing in metrodb.search(Query().ingredient.exists())]
+    ingredients.sort()
+    return ingredients
+
+def allergens_list():
+    allergens = [a for a in set().union(*[set(entry["allergens"]) for entry in metrodb.search(Query().allergens.exists())])]
+    allergens.sort()
+    return allergens
+
+def categories_list():
+    categories = [c for c in set([entry["category"] for entry in metrodb.search(Query().category.exists())])]
+    categories.sort()
+    return categories
+
 class RecipePage(FettnapfPage):
     @cherrypy.expose
     def index(self):
@@ -275,6 +303,17 @@ class RepertoirePage(FettnapfPage):
                 <form action="edit" method="post">
                  <p><input type="submit" value="Rezept editieren"></p>
                 </form>
+                     <hr>
+                <form action="add_ingredient">
+                 <p><input type="submit" value="Neue Zutat"></p>
+                </form>
+                <form action="delete_ingredient" method="post">
+                 <p><input type="submit" value="Zutat löschen"></p>
+                </form>
+                <form action="edit_ingredient">
+                 <p><input type="submit" value="Zutat editieren"></p>
+                </form>
+                     <hr>
                 <form action="..">
                  <p><input type="submit" value="Kalkulation"></p>
                 </form>
@@ -290,7 +329,7 @@ class RepertoirePage(FettnapfPage):
                 <form action="delete_recipe" method="post">
                  <select name="recipe_name" id="select" required style="width:100%">
                   <option disabled selected value> -- Rezept zum löschen auswählen -- </option>
-                  {self.recipe_options()}
+                  {options(self.recipes())}
                  </select>
                  <p><input type="submit" value="Wirklich löschen!"></p>
                  </form>
@@ -310,23 +349,162 @@ class RepertoirePage(FettnapfPage):
         raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} gelöscht!"))
     
     @cherrypy.expose
+    def delete_ingredient(self):
+        return self.html_body("repertoire",
+            f"""{randomoji_link(".")}
+                <form action="delete_ingredient_action" method="post">
+                 <select name="ingredient_name" id="select" required style="width:100%">
+                  <option disabled selected value> -- Zutat zum löschen auswählen -- </option>
+                  {options(ingredients_list())}
+                 </select>
+                 <p><input type="submit" value="Wirklich löschen!"></p>
+                 </form>
+                <form action="{self.root}/repertoire">
+                 <p><input type="submit" value="Doch nicht."></p>
+                </form>
+            """)
+
+    @cherrypy.expose
+    def delete_ingredient_action(self, **kwargs):
+        ingredient_name = kwargs["ingredient_name"]
+        metrodb.remove(Query().ingredient == ingredient_name)
+        raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Zutat {ingredient_name.capitalize()} gelöscht!"))
+
+    @cherrypy.expose
+    def add_ingredient(self, **kwargs):
+        
+        allergens = datalist("allergens", allergens_list())
+
+        categories = datalist("categories", categories_list())
+
+        return self.html_body("repertoire",
+            f"""<p style="font-size:5em; text-align:center;">
+                 {randomoji()}
+                </p>
+                <form action="add_ingredient_action" method="post">
+                 <label for="ingredient_name">Zutat:</label>
+                 <input type="text" name="ingredient_name" id="ingredient_name" required style="width:100%"><br><br>
+                 <label for="ingredient_name">Zutat auf englisch:</label>
+                 <input type="text" name="ingredient_name_en" id="ingredient_name_en" required style="width:100%"><br><br>
+                 <label for="category">Kategorie:</label>
+                 <select name="category" id="category" required>
+                  <option disabled selected value> -- Kategorie auswählen -- </option>
+                  {categories}
+                 </select><br>
+                 <label>Allergene:</label><br>
+                 <select name="allergens" id="allergens"  style="display:inline" multiple size={len(allergens_list())}>
+                  {allergens}
+                 </select><br><br>
+                 <p><input type="submit" value="Zutat hinzufügen"></p>
+                </form>
+            """)
+
+    @cherrypy.expose
+    def edit_ingredient(self, **kwargs):
+        if not kwargs:
+            ingredients = ingredients_list()
+                       
+            return self.html_body("repertoire",
+               f"""{randomoji_link(".")}
+                   <form action="" method="post">
+                    <select name="ingredient_name" id="select" required style="width:100%">
+                     <option disabled selected value> -- Zutat zum editieren auswählen -- </option>
+                     {"".join(f"<option value=\"{ingredient}\"> {ingredient.capitalize()} </option>" for ingredient in ingredients)}
+                    </select>
+                    <p><input type="submit" value="Editieren!"></p>
+                    </form>
+                   <form action="{self.root}/repertoire">
+                    <p><input type="submit" value="Doch nicht."></p>
+                   </form>
+                    <br>
+               """)
+        else:
+            ingredient_name = kwargs["ingredient_name"]
+            ingredient = metrodb.search(Query().ingredient == ingredient_name)[0]
+
+            allergens = datalist("allergens", allergens_list(), ingredient['allergens'])
+            categories = datalist("categories",
+                                  categories_list(),
+                                  ingredient['category'])
+        
+
+            formentries = f"""
+                 <select name="allergens" id="allergens"  style="display:inline" multiple size={len(allergens_list())}>
+                  {allergens}
+                 </select><br><br> """
+                
+            return self.html_body("repertoire",
+                f"""<p style="font-size:5em; text-align:center;">
+                     {randomoji()}
+                    </p>
+                    <form action="add_ingredient_action" method="post">
+                     <input type="hidden" id="edit" value="aaa" name="edit">
+                     <label for="ingredient_name">Zutat:</label>
+                     <input name="ingredient_name" value="{ingredient_name.capitalize()}" readonly input style="width:100%"><br><br>
+                     <label for="ingredient_name">auf Englisch:</label>
+                     <input type="text" name="ingredient_name_en" id="ingredient_name_en" value="{ingredient['english'].capitalize()}" required style="width:100%"><br><br>
+                     <label for="category">Kategorie:</label>
+                     <select name="category" id="category" required>
+                      {categories}
+                     </select><br>
+                     <label>Allergene:</label><br>
+                     {formentries}
+                     <p><input type="submit" value="Zutat editieren"></p>
+                    </form>
+                """)
+
+
+    @cherrypy.expose
+    def add_ingredient_action(self, **kwargs):
+        print(kwargs)
+        ingredient_name = kwargs["ingredient_name"]
+        ingredient_name_en = kwargs["ingredient_name_en"]
+        category = kwargs["category"]
+        if "allergens" in kwargs.keys():
+            if isinstance(kwargs["allergens"], list):
+                allergens = [a.lower() for a in kwargs["allergens"]]
+            else:
+                allergens = [kwargs["allergens"].lower()]
+        else:
+            allergens = []
+        edit = "edit" in kwargs.keys()
+
+        allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + ".,äöüÄÖÜß !?€-/\"\'\n\r")
+        if not set(ingredient_name + ingredient_name_en).issubset(allowed.union(set("()"))):
+            return self.error_page(f"Zutaten dürfen nur Buchstaben, Zahlen, Punkt und Komma enthalten,\
+                                     aber du hast {ingredient_name} und {ingredient_name_en} gesagt.")
+
+        if metrodb.search(Query().ingredient == ingredient_name.lower()) and not edit:
+            return self.error_page(f"Die Zutat {ingredient_name.capitalize()} gibt es schon.")
+        else:
+            metrodb.upsert({"english" : ingredient_name_en.lower(),
+                             "category" : category.lower(),
+                             "ingredient" : ingredient_name.lower(),
+                             "allergens" : allergens
+                           }, Query().ingredient == ingredient_name.lower())
+
+            message = f"Zutat {ingredient_name.capitalize()} " + ("editiert!" if edit else "hinzugefügt!")
+
+            raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(message))
+
+
+    @cherrypy.expose
     def add(self):
         
         n_ingredients = 15
         
-        ingredients = [entry["ingredient"] for entry in metrodb.search(Query().ingredient.exists())]
-        ing_datalist = "<datalist id=\"ingredients\">\n"
-        for ingredient in ingredients:
-            ing_datalist += f"<option value=\"{ingredient.capitalize()}\">{ingredient.capitalize()}</option>\n"
-        ing_datalist += "</datalist>"
+        ingredients = datalist("ingredients",
+                               [entry["ingredient"] for entry in metrodb.search(Query().ingredient.exists())])
 
-        materials = set().union(*[set(entry["materials"]) for entry in db[self.user].search(Query().materials.exists())])
-        mat_datalist = "<datalist id=\"materials\">\n"
-        for material in materials:
-            mat_datalist += f"<option value=\"{material.capitalize()}\">{material.capitalize()}</option>\n"
-        mat_datalist += "</datalist>"
+        materials = datalist("materials",
+                             set().union(*[set(entry["materials"]) for entry in db[self.user].search(Query().materials.exists())]))
 
-        categories = "".join(set("<option value=\"" + cat["category"] + "\">" + cat["category"].capitalize() + " </option>" for cat in db[self.user].search(Query().category.exists())))
+        categories = "".join(set("<option value=\"" 
+                                 + cat["category"] 
+                                 + "\">" 
+                                 + cat["category"].capitalize() 
+                                 + " </option>" 
+                             for cat in db[self.user].search(Query().category.exists())))
 
         formentries = ""
         for i in range(n_ingredients):
@@ -350,13 +528,13 @@ class RepertoirePage(FettnapfPage):
                  <input type="number" name="servings" id="servings" required><br><br>
                  <fieldset>
                   <legend>Menge in kg - Zutaten:</legend>
-                  {ing_datalist}
+                  {ingredients}
                   {formentries}
                  </fieldset><br><br>
                  <label for="instructions">Anleitung (optional):</label>
                  <textarea name="instructions" id="instructions" style="height:15em;"></textarea><br>
                  <label>Besonderes Equipment (optional):</label>
-                 {mat_datalist}
+                 {materials}
                  <input type="text" name="material1" id="material1" style="width:100%" list="materials"><br>
                  <input type="text" name="material2" id="material2" style="width:100%" list="materials"><br>
                  <input type="text" name="material3" id="material3" style="width:100%" list="materials"><br>
@@ -400,7 +578,8 @@ class RepertoirePage(FettnapfPage):
         else:
             return self.error_page("Dein Rezept hat keine Zutaten.")
 
-        recipe = Recipe(recipe_name, int(servings), ingredients_counter, instructions, materials, category)
+        recipe = Recipe(recipe_name, int(servings), 
+                        ingredients_counter, instructions, materials, category)
 
         if db[self.user].search(Query().name == recipe_name):
             return self.error_page(f"Gibt schon ein Rezept für {recipe_name.capitalize()}, nimm einen anderen Namen.")
@@ -416,7 +595,7 @@ class RepertoirePage(FettnapfPage):
                    <form action="" method="post">
                     <select name="recipe_name" id="select" required style="width:100%">
                      <option disabled selected value> -- Rezept zum editieren auswählen -- </option>
-                     {self.recipe_options()}
+                     {options(self.recipes())}
                     </select>
                     <p><input type="submit" value="Editieren!"></p>
                     </form>
