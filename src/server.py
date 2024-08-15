@@ -95,7 +95,7 @@ class FettnapfPage:
             recipe_links = []
             for recipe in recipes:
                 if edit:
-                    link = f"repertoire/edit/?recipe_name={urllib.parse.quote(recipe)}"
+                    link = f"repertoire/edit_recipe/?recipe_name={urllib.parse.quote(recipe)}"
                 else:
                     link = f"calculate?{urllib.parse.quote(recipe)}=10"
                 recipe_links.append(f"""<a href="{self.root}/{link}">{recipe.capitalize().replace("_"," ")}</a>""")
