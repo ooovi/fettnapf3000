@@ -357,13 +357,14 @@ class RepertoirePage(FettnapfPage):
 
         allergens = datalist("allergens", allergens_list(), selected_allergens)
         categories = datalist("categories", categories_list(), [selected_category])
+        edit_name = """<input type="hidden" id="edit" value="aaa" name="edit">""" if name else ""
         
         return self.html_body("repertoire",
             f"""<p style="font-size:5em; text-align:center;">
                  {randomoji()}
                 </p>
                 <form action="{action}" method="post">
-                {"""<input type="hidden" id="edit" value="aaa" name="edit">""" if name else ""}
+                {edit_name}
                  <label for="ingredient_name">Zutat:</label>
                  <input type="text"
                         name="ingredient_name"
@@ -396,8 +397,8 @@ class RepertoirePage(FettnapfPage):
     @cherrypy.expose
     def add_ingredient(self, **kwargs):
         return self.ingredient_form("add_ingredient_action") + \
-               f"<br> <h1>Zutaten</h1> <ul>{"".join("<li>" +
-                    f"""<a href="{self.root}/repertoire/edit_ingredient/?name={urllib.parse.quote(i)}">{i.capitalize().replace("_"," ")}</a>""" + "</li>" for i in ingredients_list())}</ul>"
+               "<br> <h1>Zutaten</h1> <ul>" + "".join("<li>" +
+                    f"""<a href="{self.root}/repertoire/edit_ingredient/?name={urllib.parse.quote(i)}">{i.capitalize().replace("_"," ")}</a>""" + "</li>" for i in ingredients_list()) + "</ul>"
 
         
     @cherrypy.expose
