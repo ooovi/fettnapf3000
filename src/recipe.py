@@ -15,10 +15,9 @@ class Recipe:
 
         allergens = []
         User = Query()
-        print(ingredients)
+
         for (section, ings) in ingredients:
            for (ing, s) in ings.items():
-              print(ing)
               db_entries = metrodb.search(User.ingredient == ing)
               if db_entries:
                   ing_allergens = db_entries[0]["allergens"]
