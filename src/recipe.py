@@ -1,7 +1,6 @@
 from collections import Counter
-from tinydb import TinyDB, Query
-
-metrodb = TinyDB('../../fettnapf3000recipes/metrodb.json', indent=2)
+from tinydb import Query
+from metrodb import metrodb
 
 class Recipe:
     def __init__(self, name: str, n_servings: int, ingredients: [(str,Counter)], instructions: str, materials: set[str], category="misc"):
