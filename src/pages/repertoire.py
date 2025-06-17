@@ -7,7 +7,7 @@ from collections import Counter
 from pages.fettnapf import FettnapfPage
 from utils import randomoji, randomoji_link, options, datalist
 from recipe import Recipe, recipe_string, recipe_dict
-from metrodb import metrodb, ingredients_list, allergens_list, categories_list
+from metrodb import metrodb, ingredients_list, allergens_list, categories_list, get_ingredient
 import parser
 
 allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + ".,äöüÄÖÜß !?€-/\"\'\n\r")
@@ -78,16 +78,20 @@ class RepertoirePage(FettnapfPage):
     @cherrypy.expose
     def delete_ingredient_action(self, **kwargs):
         ingredient_name = kwargs["name"]
-        metrodb.remove(Query().ingredient == ingredient_name)
+        q = Query()
+        metrodb.remove((q.ingredient == ingredient_name) | (q.english == ingredient_name))
         raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" +
                                       urllib.parse.quote(f"Zutat {ingredient_name.capitalize()} gelöscht!"))
 
     # form for ingredient database, optionally pre-filled
-    def ingredient_form(self, action, name = "", name_en = "", selected_category = "", selected_allergens = []):
+    def ingredient_form(self, action, names = {}, selected_category = "", selected_allergens = []):
+
+        name_de = names['de'].capitalize() if 'de' in names else ''
+        name_en = names['en'].capitalize() if 'en' in names else ''
 
         allergens = datalist("allergens", allergens_list(), selected_allergens)
         categories = datalist("categories", categories_list(), [selected_category])
-        edit_name = """<input type="hidden" id="edit" value="aaa" name="edit">""" if name else ""
+        edit_name = """<input type="hidden" id="edit" value="aaa" name="edit">""" if name_de else ""
         
         return self.html_body("repertoire",
             f"""<p style="font-size:5em; text-align:center;">
@@ -95,19 +99,19 @@ class RepertoirePage(FettnapfPage):
                 </p>
                 <form action="{action}" method="post">
                 {edit_name}
-                 <label for="ingredient_name">Zutat:</label>
+                 <label for="ingredient_name">Zutat (DE):</label>
                  <input type="text"
                         name="ingredient_name"
                         id="ingredient_name"
-                        value="{name.capitalize()}"
+                        value="{name_de}"
                         required
-                        {"readonly" if name else ""}
+                        {"readonly" if name_de else ""}
                         style="width:100%">
                  <br><br>
-                 <label for="ingredient_name">Zutat auf englisch:</label>
+                 <label for="ingredient_name">Zutat (EN):</label>
                  <input type="text"
                         name="ingredient_name_en"
-                        value="{name_en.capitalize()}"
+                        value="{name_en}"
                         id="ingredient_name_en"
                         required
                         style="width:100%"><br><br>
@@ -120,7 +124,7 @@ class RepertoirePage(FettnapfPage):
                  <select name="allergens" id="allergens"  style="display:inline" multiple size={len(allergens_list())}>
                   {allergens}
                  </select><br><br>
-                 <p><input type="submit" value="Zutat {"editieren" if name else "hinzufügen"}"></p>
+                 <p><input type="submit" value="Zutat {"editieren" if name_de else "hinzufügen"}"></p>
                 </form>
             """)
 
@@ -138,11 +142,10 @@ class RepertoirePage(FettnapfPage):
             return self.selection_page("Zutat zum editieren auswählen", "Editieren!", "", ingredients)
         else:
             ingredient_name = kwargs["name"]
-            ingredient = metrodb.search(Query().ingredient == ingredient_name)[0]
+            ingredient = get_ingredient(ingredient_name)
 
             return self.ingredient_form("add_ingredient_action",
-                                         ingredient_name,
-                                         ingredient["english"],
+                                         ingredient["names"],
                                          ingredient["category"],
                                          ingredient["allergens"])
                 
@@ -166,7 +169,7 @@ class RepertoirePage(FettnapfPage):
             return self.error_page(f"Zutaten dürfen nur Buchstaben, Zahlen, Punkt und Komma enthalten,\
                                      aber du hast {ingredient_name} und {ingredient_name_en} gesagt.")
 
-        if metrodb.search(Query().ingredient == ingredient_name.lower()) and not edit:
+        if get_ingredient(ingredient_name.lower()) and not edit:
             return self.error_page(f"Die Zutat {ingredient_name.capitalize()} gibt es schon.")
         else:
             metrodb.upsert({"english" : ingredient_name_en.lower(),
@@ -323,7 +326,7 @@ Stabmixer
                     <form action="edit_recipe_action" method="get">
                      <label for="recipe_name"">Rezeptname:</label>
                      <input name="recipe_name" value="{recipe_name}" readonly input type="hidden">
-                     <textarea name="recipe" style="height:30em;">{recipe_string(recipe)}</textarea><br>
+                     <textarea name="recipe" style="height:30em;">{recipe_string(recipe, 'de')}</textarea><br>
                      <p><input type="submit" value="Speichern"></p>
                     </form>
                     """)

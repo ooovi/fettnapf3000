@@ -62,7 +62,7 @@ class RecipePage(FettnapfPage):
     
     @cherrypy.expose
     def calculate_menu(self, **kwargs):
-        return self.plan_menu(kwargs.get("menu"))
+        return self.plan_menu(kwargs.get("menu"), kwargs.get("lang") or 'de')
 
     @cherrypy.expose
     def request(self, **kwargs):
@@ -77,4 +77,4 @@ class RecipePage(FettnapfPage):
         if not kwargs:
             raise cherrypy.HTTPRedirect(f"/{self.root}")
 
-        return self.plan_menu("### Rezepte\n" + "\n".join(f"{n} {recipe_name}" for (recipe_name, n) in kwargs.items()))
+        return self.plan_menu("### Rezepte\n" + "\n".join(f"{n} {recipe_name}" for (recipe_name, n) in kwargs.items()), kwargs.get("lang") or 'de')

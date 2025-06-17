@@ -1,7 +1,8 @@
 from collections import Counter
 from tinydb import Query
 from recipe import Recipe, recipe_string
-from metrodb import metrodb
+from metrodb import get_ingredient
+from i18n import translate_category
 
 # sort the categories like they are arranged in the wholesale
 def cat_sort(cat: str):
@@ -33,8 +34,7 @@ def cat_sort(cat: str):
 #   - a markdown list of all special materials from all recipes
 #   - a markdown shopping list, sectioned by ingredient category
 #   - a markdown collection of recipes.
-def compile_lists(menu: dict[str, tuple[Recipe, float]]):
-
+def compile_lists(menu: dict[str, tuple[Recipe, float]], lang):
     menu_list = ""     # list of recipes and servings for the menu overview page
     total_weight = 0   # total weight of all ingredients
     total_servings = 0 # total nuber of servings
@@ -74,7 +74,7 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
 
                 # collect recipe string
                 if n_servings != 0 and recipe.name != "misc":
-                    cat_recipes.append(recipe_string(recipe, n_servings, True))
+                    cat_recipes.append(recipe_string(recipe, lang, n_servings, True))
 
         # pagebreak after each category
         recipe_list += ("---").join(cat_recipes)
@@ -83,10 +83,11 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
     materials_list = "" if materials == set() else "\n## Spezialequipment\n\n" +\
                                                     "\n".join([f"- {item.capitalize()}" for item in materials])
 
-    return menu_list, materials_list, total_weight, total_servings, max_servings, allergens, shopping_list(total_ingredients), recipe_list
+    return menu_list, materials_list, total_weight, total_servings, max_servings, allergens, shopping_list(total_ingredients, lang), recipe_list
 
 
-def shopping_list(total_ingredients: Counter):
+def shopping_list(total_ingredients: Counter, lang):
+
     cat_dict = dict()
     # insert into cat dict         
     def insert(cat, ingredient, amount):
@@ -98,12 +99,15 @@ def shopping_list(total_ingredients: Counter):
     # split ingredients wrt market categories
     User = Query()
     for (ingredient, amount) in total_ingredients.items():
-        db_entries = metrodb.search(User.ingredient == ingredient)
-        if db_entries == []:
+        db_ingredient = get_ingredient(ingredient)
+        if not db_ingredient:
             insert("none", ingredient, amount)
         else:
-            cat = db_entries[0]["category"]
-            insert(cat, ingredient, amount)
+            cat = translate_category(db_ingredient["category"], lang)
+            name = db_ingredient["names"][lang] if lang in db_ingredient["names"] else None
+            if not name:
+                name = db_ingredient["names"]["de"]
+            insert(cat, name, amount)
 
     # print one category
     def cat_markdown(cat: str):
@@ -126,10 +130,10 @@ def shopping_list(total_ingredients: Counter):
     return slist
 
 
-def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
+def plan(menu: dict[str, tuple[Recipe, float]], lang) -> str:
     
     (menu_list, materials_list, total_weight, total_servings,\
-                    max_servings, allergens, shopping_list, recipe_list) = compile_lists(menu)
+                    max_servings, allergens, shopping_list, recipe_list) = compile_lists(menu, lang)
     
     text = "# Menü\n\n"
     text += menu_list

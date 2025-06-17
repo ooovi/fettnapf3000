@@ -16,3 +16,28 @@ def categories_list():
     categories = [c for c in set([entry["category"] for entry in metrodb.search(Query().category.exists())])]
     categories.sort()
     return categories
+
+
+def get_ingredient(name):
+    """
+    search for ingredient in any language
+    """
+    q = Query()
+    db_entries = metrodb.search(( q.ingredient == name) | (q.english == name))
+    if db_entries:
+        entry = db_entries[0]
+        
+        names = {
+            'de': entry['ingredient'],
+        }
+        if entry['english']:
+            names['en'] = entry['english']
+
+        return {
+            'id': entry.doc_id,
+            'names': names,
+            'category': entry['category'],
+            'allergens': entry['allergens']
+        }
+    else:
+        return None

@@ -90,7 +90,7 @@ class FettnapfPage:
             html_str += "".join("<dd>" + recipe + "</dd>" for recipe in recipe_links)
         return html_str + "</dl>"
 
-    def plan_menu(self, menu_md):
+    def plan_menu(self, menu_md, lang):
         try:
             menu_list = parser.parse_menu(menu_md)
         except parser.ParseError as e:
@@ -112,7 +112,7 @@ class FettnapfPage:
              else:
                  menu[category] = [(recipe, n_servings)]
 
-        plan = planner.plan(menu)
+        plan = planner.plan(menu, lang)
     
         extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
         plan_html = markdown.markdown(plan,
