@@ -620,10 +620,11 @@ Stabmixer
             raise cherrypy.HTTPRedirect(f"{self.root}/repertoire?text=" + urllib.parse.quote(f"Rezept {recipe_name.capitalize()} editiert!"))
 
 
-TEAM_USERS = json.load(open("users.txt"))
-F4A_USERS = json.load(open("f4a_users.txt"))
-CUTIEMEOW_USERS = json.load(open("cutiemeow_users.txt"))
-KEY = open("key.txt").read()
+if os.path.isfile("key.txt"):
+    KEY = open("key.txt").read()
+else:
+    print("Warning: key.txt not found. using an insecure string for development")
+    KEY = "topsecret"
 
 if __name__ == '__main__':
     if len(sys.argv) == 3:
@@ -641,28 +642,38 @@ if __name__ == '__main__':
             'tools.staticdir.on': True,
             'tools.staticdir.dir': './public'
         },
-        '/repertoire': {
+    }
+
+    if os.path.isfile("users.txt"):
+        TEAM_USERS = json.load(open("users.txt"))
+        conf['/repertoire'] = {
             'tools.auth_digest.on': True,
             'tools.auth_digest.realm': 'localhost',
             'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_dict_plain(TEAM_USERS),
             'tools.auth_digest.key': KEY,
             'tools.auth_digest.accept_charset': 'UTF-8',
-         },
-         '/food4action/repertoire': {
+         }
+
+    if os.path.isfile("f4a_users.txt"):
+        F4A_USERS = json.load(open("f4a_users.txt"))
+        conf['/food4action/repertoire'] = {
             'tools.auth_digest.on': True,
             'tools.auth_digest.realm': 'localhost',
             'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_dict_plain(F4A_USERS),
             'tools.auth_digest.key': KEY,
             'tools.auth_digest.accept_charset': 'UTF-8',
-         },
-         '/cutiemeow/repertoire': {
+        }
+
+    if os.path.isfile("cutiemeow_users.txt"):
+        CUTIEMEOW_USERS = json.load(open("cutiemeow_users.txt"))
+
+        conf['/cutiemeow/repertoire'] = {
             'tools.auth_digest.on': True,
             'tools.auth_digest.realm': 'localhost',
             'tools.auth_digest.get_ha1': cherrypy.lib.auth_digest.get_ha1_dict_plain(CUTIEMEOW_USERS),
             'tools.auth_digest.key': KEY,
             'tools.auth_digest.accept_charset': 'UTF-8',
-         }
-    }
+        }
 
     root = RecipePage()
     root.team = RecipePage("team")
