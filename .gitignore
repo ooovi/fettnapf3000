@@ -1,0 +1,9 @@
+key.txt
+users.txt
+*_users.txt
+
+# python specific
+__pycache__
+*.py[codz]
+venv
+env
