@@ -2,7 +2,7 @@ from collections import Counter
 from tinydb import Query
 from recipe import Recipe, recipe_string
 from metrodb import get_ingredient
-from i18n import translate_category
+from i18n import translate_category, get_i18n, category_name_to_id
 
 # sort the categories like they are arranged in the wholesale
 def cat_sort(cat: str):
@@ -35,6 +35,8 @@ def cat_sort(cat: str):
 #   - a markdown shopping list, sectioned by ingredient category
 #   - a markdown collection of recipes.
 def compile_lists(menu: dict[str, tuple[Recipe, float]], lang):
+    _ = get_i18n(lang).gettext
+    ngettext = get_i18n(lang).ngettext
     menu_list = ""     # list of recipes and servings for the menu overview page
     total_weight = 0   # total weight of all ingredients
     total_servings = 0 # total nuber of servings
@@ -54,7 +56,7 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]], lang):
         for (recipe, n_servings) in menu[category]:
 
             # collect ingredients for shopping list
-            for (_, ingredients) in recipe.scaled_ingredients(n_servings):
+            for (__, ingredients) in recipe.scaled_ingredients(n_servings):
                 total_ingredients += ingredients
 
             for allergen in recipe.allergens:
@@ -70,7 +72,7 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]], lang):
                 max_servings = max(max_servings, n_servings)
 
                 # collect recipe for menu overview
-                menu_list += f"- {n_servings:g} Portionen {recipe.name.capitalize()}\n"
+                menu_list += f"- {ngettext("%(num)d serving", "%(num)d servings", n_servings) % {'num': n_servings}} {recipe.name.capitalize()}\n"
 
                 # collect recipe string
                 if n_servings != 0 and recipe.name != "misc":
@@ -80,14 +82,14 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]], lang):
         recipe_list += ("---").join(cat_recipes)
 
     # make a total materials list for the overview
-    materials_list = "" if materials == set() else "\n## Spezialequipment\n\n" +\
+    materials_list = "" if materials == set() else f"\n## {_('Special equipment')}\n\n" +\
                                                     "\n".join([f"- {item.capitalize()}" for item in materials])
 
     return menu_list, materials_list, total_weight, total_servings, max_servings, allergens, shopping_list(total_ingredients, lang), recipe_list
 
 
 def shopping_list(total_ingredients: Counter, lang):
-
+    _ = get_i18n(lang).gettext
     cat_dict = dict()
     # insert into cat dict         
     def insert(cat, ingredient, amount):
@@ -116,7 +118,7 @@ def shopping_list(total_ingredients: Counter, lang):
         for (ingredient, amount) in cat_dict[cat]:
             md += f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()}\n"
             cat_amount += amount
-        md = f"\n### {cat.capitalize()} ({round(cat_amount,3):g} kg)\n\n" + md
+        md = f"\n### {_(category_name_to_id(cat))} ({round(cat_amount,3):g} kg)\n\n" + md
         return md
 
     # print all categories
@@ -131,27 +133,28 @@ def shopping_list(total_ingredients: Counter, lang):
 
 
 def plan(menu: dict[str, tuple[Recipe, float]], lang) -> str:
+    _ = get_i18n(lang).gettext
     
     (menu_list, materials_list, total_weight, total_servings,\
                     max_servings, allergens, shopping_list, recipe_list) = compile_lists(menu, lang)
     
-    text = "# Menü\n\n"
+    text = f"# {_("Menu")}\n\n"
     text += menu_list
 
     text += f"\n\n {materials_list} \n\n"
     
-    text += "### Stats\n\n"
-    text += f"***Allergene:*** " + ", ".join([a.capitalize() for a in allergens]) + "\n\n"
-    text += f"***Portionen insgesamt:*** {total_servings:g}\n\n"
-    text += f"***Maximale Portionen pro Rezept:*** {max_servings:g}\n\n"
-    text += f"***Gesamtgewicht der Zutaten:*** {total_weight:g} kg \n\n"
-    text += f"***Geschätztes Gesamtvolumen der Zutaten:*** {(round(5*total_weight,0)):g} liter \n\n"
+    text += f"### {_("Stats")}\n\n"
+    text += f"***{_("Allergens")}:*** " + ", ".join([a.capitalize() for a in allergens]) + "\n\n"
+    text += f"***{_("Total servings")}:*** {total_servings:g}\n\n"
+    text += f"***{_("Maximum portions per recipe")}:*** {max_servings:g}\n\n"
+    text += f"***{_("Total weight of the ingredients")}:*** {total_weight:g} kg \n\n"
+    text += f"***{_("Estimated total volume of ingredients")}:*** {(round(5*total_weight,0)):g} liter \n\n"
     text += md_pagebreak
     
     # printing two shopping lists cuz it handy
     #text += shopping_list
     #text += md_pagebreak
-    text += "\n# Einkaufsliste\n\n"
+    text += f"\n# {_("Shopping list")}\n\n"
     text += shopping_list
     text += md_pagebreak
     
@@ -159,7 +162,7 @@ def plan(menu: dict[str, tuple[Recipe, float]], lang) -> str:
     
     return text
 
-md_pagebreak = "\n<div style=\"page-break-after: always; visibility: hidden\">\n\pagebreak</div>\n"
+md_pagebreak = "\n<div style=\"page-break-after: always; visibility: hidden\">\n\\pagebreak</div>\n"
 
 general_text = """
 ## Ort klären:

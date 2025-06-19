@@ -2,6 +2,8 @@ from collections import Counter
 from tinydb import Query
 from metrodb import get_ingredient
 
+from i18n import get_i18n
+
 class Recipe:
     def __init__(self, name: str, n_servings: int, ingredients: [(str,Counter)], instructions: str, materials: set[str], category="misc"):
         self.name = name.lower()
@@ -10,7 +12,7 @@ class Recipe:
         self.instructions = instructions
         self.materials = set(material.lower() for material in materials)
         self.category = category.lower()
-        self.total_weight = round(sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in self.ingredients])/n_servings,3)
+        self.total_weight = round(sum([sum(count for (ingredient,count) in ings.items()) for (cat,ings) in ingredients])/n_servings,3)
 
         allergens = []
         User = Query()
@@ -51,16 +53,18 @@ class Recipe:
 
 # make a nice markdown recipe
 def recipe_string(recipe: Recipe, lang, n_servings=None, pretty=False) -> str:
+    _ = get_i18n(lang).gettext
+    ngettext = get_i18n(lang).ngettext
     if not n_servings:
         n_servings = recipe.n_servings
 
     scaled_recipe = recipe.scaled_ingredients(n_servings)
     
     # name header
-    recipe_str = f"\n## {recipe.name.capitalize()}\n{n_servings:g} Portionen\n"
+    recipe_str = f"\n## {recipe.name.capitalize()}\n{ngettext("%(num)d serving", "%(num)d servings", n_servings) % {'num': n_servings}}\n"
 
     if pretty: # print allergens
-        recipe_str += f"\nAllergene: " + ", ".join([allergen.capitalize() for allergen in recipe.allergens]) + "\n"
+        recipe_str += f"\n{_("Allergens")}: " + ", ".join([allergen.capitalize() for allergen in recipe.allergens]) + "\n"
     
     if pretty: # make a pretty table
         recipe_str += "\n"
@@ -68,7 +72,7 @@ def recipe_string(recipe: Recipe, lang, n_servings=None, pretty=False) -> str:
             if subsection != "":
                 recipe_str += "\n#### " + subsection.capitalize() + "\n"
             # ingredients table
-            recipe_str += "| kg | Zutat | *kg pro Portion* |\n"
+            recipe_str += f"| kg | {_("Ingredient")} | *{_("kg per serving")}* |\n"
             recipe_str += "|:----|:-------------|:---------------:|\n"
             for (ingredient, amount) in scaled_ingredients.items():
                 db_ingredient = get_ingredient(ingredient)
@@ -79,12 +83,12 @@ def recipe_string(recipe: Recipe, lang, n_servings=None, pretty=False) -> str:
                 recipe_str += f"| {round(amount,3):g} | {name.capitalize()} |  *{round(amount/n_servings,3):g}* |"  
                 recipe_str += "\n"
             
-        recipe_str += f"\nGesamtgewicht: {n_servings * recipe.total_weight:g} kg\n"
-        recipe_str += f"\nGewicht pro Portion: {recipe.total_weight:g} kg\n"
+        recipe_str += f"\n{_("Total weight")}: {n_servings * recipe.total_weight:g} kg\n"
+        recipe_str += f"\n{_("Weight per serving")}: {recipe.total_weight:g} kg\n"
 
     else: # just make a human readable string
-        recipe_str += "Kategorie: " + recipe.category.capitalize() + "\n"
-        recipe_str += "\n### Zutaten\n"
+        recipe_str += f"{_("Category")}: " + recipe.category.capitalize() + "\n"
+        recipe_str += f"\n### {_("Ingredients")}\n"
         for (subsection, scaled_ingredients) in scaled_recipe:
             if subsection != "":
                 recipe_str += "\n#### " + subsection.capitalize() + "\n"
@@ -101,12 +105,12 @@ def recipe_string(recipe: Recipe, lang, n_servings=None, pretty=False) -> str:
     
     # instructions
     if recipe.instructions != "":
-        recipe_str += "### Anleitung\n"
+        recipe_str += f"### {_("Instructions")}\n"
         recipe_str += f"{recipe.instructions}\n\n"
         
     # materials
     if recipe.materials != set():
-        recipe_str += "### Material\n"
+        recipe_str += f"### {_("Materials")}\n"
         recipe_str += "\n".join(f"{name.capitalize()}" for name in recipe.materials) + "\n\n"
         
     recipe_str += "\n\n"

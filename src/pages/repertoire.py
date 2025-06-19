@@ -326,7 +326,7 @@ Stabmixer
                     <form action="edit_recipe_action" method="get">
                      <label for="recipe_name"">Rezeptname:</label>
                      <input name="recipe_name" value="{recipe_name}" readonly input type="hidden">
-                     <textarea name="recipe" style="height:30em;">{recipe_string(recipe, 'de')}</textarea><br>
+                     <textarea name="recipe" style="height:30em;">{recipe_string(recipe, self.get_language())}</textarea><br>
                      <p><input type="submit" value="Speichern"></p>
                     </form>
                     """)
