@@ -28,7 +28,7 @@ def main():
                menu[category] = [(recipe, n_servings)]
 
        # make a plan!
-       plan_markdown = plan(menu)
+       plan_markdown = plan(menu, 'de')
 
        if importlib.util.find_spec('pypandoc'):
            # convert to pdf using pypandoc and write it to file

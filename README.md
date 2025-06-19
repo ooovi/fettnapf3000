@@ -10,18 +10,32 @@ A tool for planning almost-arbitrary-scale cooking activities. Can generate a me
 - [pypandoc](https://pypi.org/project/pypandoc/) for pdf export
 
 ## Usage
-### Web interface (recommended)
 
+### Hosted Web interface (recommended)
 We host an instance with our recipes [here](https://teamgeil.uber.space).
 
-To start a local server serving the fettnapf at port 8000, navigate to the `src` directory and run
-```python
-python server.py 8000
+### Local Web interface
+To start a local server clone the repositories with
+```sh
+git clone https://github.com/ooovi/fettnapf3000.git
+git clone https://github.com/ooovi/fettnapf3000recipes.git
+```
+
+Then go into the newly created `fettnapf3000` directory and create the translation files with
+```sh
+cd fettnapf3000
+make compile-messages
+```
+
+and start it with
+```sh
+make start
 ```
 You may now use the web interface by navigating to [`http://localhost:8000`](http://localhost:8000) in your browser.
 
 To make the server listen on a network interface different from localhost (e.g. `0.0.0.0`), run
 ```python
+cd src
 python server.py 0.0.0.0 8000
 ```
 
