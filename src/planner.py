@@ -48,10 +48,9 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
     recipe_list = ""   # markdown formatted recipe list ("cookbook")
     
     for category in menu:
-        if category != "misc":
-        
-            menu_list += "\n### " + str(category).capitalize() + "\n\n"
-            recipe_list += "\n# " + str(category).capitalize() + "\n\n"
+    
+        menu_list += "\n### " + str(category).capitalize() + "\n\n"
+        recipe_list += "\n# " + str(category).capitalize() + "\n\n"
 
         cat_recipes = []
         for (recipe, n_servings) in menu[category]:
@@ -66,21 +65,22 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
             # collect materials
             materials |= recipe.materials
 
-            if category != "misc":
-                # update stats
-                total_weight += n_servings * recipe.total_weight
+            # update stats
+            total_weight += n_servings * recipe.total_weight
+            if recipe.category != "nonfood":
                 total_servings += n_servings
                 max_servings = max(max_servings, n_servings)
 
-                # collect recipe for menu overview
-                menu_list += f"- {n_servings:g} Portionen {recipe.name.capitalize()}\n"
+           # collect recipe for menu overview
+            menu_list += f"- {n_servings:g} Portionen {recipe.name.capitalize()}\n"
 
-                # collect recipe string
-                if n_servings != 0 and recipe.name != "misc":
-                    cat_recipes.append(recipe_string(recipe, n_servings, True))
+           # collect recipe string
+            if n_servings != 0 and recipe.category != "nonfood":
+                cat_recipes.append(recipe_string(recipe, n_servings, True))
 
-        # pagebreak after each category
         recipe_list += ("---").join(cat_recipes)
+        # pagebreak after each category
+        recipe_list += md_pagebreak
 
     # make a total materials list for the overview
     materials_list = "" if materials == set() else "\n## Spezialequipment\n\n" +\
