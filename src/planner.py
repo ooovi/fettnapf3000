@@ -1,10 +1,7 @@
 from collections import Counter
-from tinydb import TinyDB, Query
+from tinydb import Query
 from recipe import Recipe, recipe_string
-
-# ingredient database
-metrodb = TinyDB('../../fettnapf3000recipes/metrodb.json', indent=2)
-
+from metrodb import metrodb
 
 # sort the categories like they are arranged in the wholesale
 def cat_sort(cat: str):
