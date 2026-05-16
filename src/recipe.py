@@ -32,7 +32,7 @@ class Recipe:
             scaled.append((section, Counter({i : n_servings * (ingredients[i] / self.n_servings) for i in ingredients})))
         return scaled
 
-    def prep(self, n_servings: float) -> (List, List):
+    def prep(self, n_servings: float) -> [(float, str, str)]:
         prep = []
         for (section, ings) in self.ingredients:
            for (ing, serv) in ings.items():
@@ -42,7 +42,7 @@ class Recipe:
                     prep.append((n_servings * (serv / self.n_servings), ing, db_entries[0]["prep"]))
         return prep
 
-    def prep_daybefore(self, n_servings: float) -> (List, List):
+    def prep_daybefore(self, n_servings: float) -> [(float, str, str)]:
         prep_daybefore = []
         for (section, ings) in self.ingredients:
            for (ing, serv) in ings.items():
