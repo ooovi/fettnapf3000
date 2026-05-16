@@ -187,8 +187,8 @@ class RepertoirePage(FettnapfPage):
             metrodb.upsert({"english" : ingredient_name_en.lower(),
                              "category" : category.lower(),
                              "ingredient" : ingredient_name.lower(),
-                             "allergens" : allergens
-                             "prep" : prep.lower()
+                             "allergens" : allergens,
+                             "prep" : prep.lower(),
                              "prep_daybefore" : prep_daybefore.lower()
                            }, Query().ingredient == ingredient_name.lower())
 
