@@ -106,7 +106,7 @@ class RepertoirePage(FettnapfPage):
                         {"readonly" if name else ""}
                         style="width:100%">
                  <br><br>
-                 <label for="ingredient_name">Zutat auf englisch:</label>
+                 <label for="ingredient_name_en">Zutat auf englisch:</label>
                  <input type="text"
                         name="ingredient_name_en"
                         value="{name_en.capitalize()}"
@@ -122,14 +122,14 @@ class RepertoirePage(FettnapfPage):
                  <select name="allergens" id="allergens"  style="display:inline" multiple size={len(allergens_list())}>
                   {allergens}
                  </select><br><br>
-                 <label>Vorbereitung:</label><br>
-                 <select name="prep" id="prep"  style="display:inline" multiple size={len(prep_list())}>
+                <label for="prep">Vorbereitung:</label>
+                 <select name="prep" id="prep">
                   {prep}
-                 </select><br><br>
-                 <label>Vorbereitung vortag:</label><br>
-                 <select name="prep_daybefore" id="prep_daybefore"  style="display:inline" multiple size={len(prep_daybefore_list())}>
+                 </select><br>
+                 <label for="prep_daybefore">Vorbereitung Vortag:</label>
+                 <select name="prep_daybefore" id="prep_daybefore">
                   {prep_daybefore}
-                 </select><br><br>
+                 </select><br>
                  <p><input type="submit" value="Zutat {"editieren" if name else "hinzufügen"}"></p>
                 </form>
             """)
