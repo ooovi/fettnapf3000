@@ -7,7 +7,7 @@ from collections import Counter
 from pages.fettnapf import FettnapfPage
 from utils import randomoji, randomoji_link, options, datalist
 from recipe import Recipe, recipe_string, recipe_dict
-from metrodb import metrodb, ingredients_list, allergens_list, categories_list
+from metrodb import metrodb, ingredients_list, allergens_list, categories_list, prep_list, prep_daybefore_list
 import parser
 
 allowed = set(string.ascii_lowercase + string.ascii_uppercase + string.digits + ".,äöüÄÖÜß !?€-/\"\'\n\r")
@@ -83,10 +83,12 @@ class RepertoirePage(FettnapfPage):
                                       urllib.parse.quote(f"Zutat {ingredient_name.capitalize()} gelöscht!"))
 
     # form for ingredient database, optionally pre-filled
-    def ingredient_form(self, action, name = "", name_en = "", selected_category = "", selected_allergens = []):
+    def ingredient_form(self, action, name = "", name_en = "", selected_category = "", selected_allergens = [], selected_prep = "", selected_prep_daybefore = ""):
 
-        allergens = datalist("allergens", allergens_list(), selected_allergens)
         categories = datalist("categories", categories_list(), [selected_category])
+        allergens = datalist("allergens", allergens_list(), selected_allergens)
+        prep = datalist("prep", prep_list(), [selected_prep])
+        prep_daybefore = datalist("prep_daybefore", prep_daybefore_list(), [selected_prep_daybefore])
         edit_name = """<input type="hidden" id="edit" value="aaa" name="edit">""" if name else ""
         
         return self.html_body("repertoire",
@@ -120,6 +122,14 @@ class RepertoirePage(FettnapfPage):
                  <select name="allergens" id="allergens"  style="display:inline" multiple size={len(allergens_list())}>
                   {allergens}
                  </select><br><br>
+                 <label>Vorbereitung:</label><br>
+                 <select name="prep" id="prep"  style="display:inline" multiple size={len(prep_list())}>
+                  {prep}
+                 </select><br><br>
+                 <label>Vorbereitung vortag:</label><br>
+                 <select name="prep_daybefore" id="prep_daybefore"  style="display:inline" multiple size={len(prep_daybefore_list())}>
+                  {prep_daybefore}
+                 </select><br><br>
                  <p><input type="submit" value="Zutat {"editieren" if name else "hinzufügen"}"></p>
                 </form>
             """)
@@ -144,8 +154,10 @@ class RepertoirePage(FettnapfPage):
                                          ingredient_name,
                                          ingredient["english"],
                                          ingredient["category"],
-                                         ingredient["allergens"])
-                
+                                         ingredient["allergens"],
+                                         ingredient["prep"],
+                                         ingredient["prep_daybefore"])
+
 
 
     @cherrypy.expose
@@ -160,6 +172,9 @@ class RepertoirePage(FettnapfPage):
                 allergens = [kwargs["allergens"].lower()]
         else:
             allergens = []
+        prep = kwargs["prep"]
+        prep_daybefore = kwargs["prep_daybefore"]
+
         edit = "edit" in kwargs.keys()
 
         if not set(ingredient_name + ingredient_name_en).issubset(allowed.union(set("()"))):
@@ -173,6 +188,8 @@ class RepertoirePage(FettnapfPage):
                              "category" : category.lower(),
                              "ingredient" : ingredient_name.lower(),
                              "allergens" : allergens
+                             "prep" : prep.lower()
+                             "prep_daybefore" : prep_daybefore.lower()
                            }, Query().ingredient == ingredient_name.lower())
 
             message = f"Zutat {ingredient_name.capitalize()} " + ("editiert!" if edit else "hinzugefügt!")

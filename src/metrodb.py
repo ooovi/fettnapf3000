@@ -16,3 +16,13 @@ def categories_list():
     categories = [c for c in set([entry["category"] for entry in metrodb.search(Query().category.exists())])]
     categories.sort()
     return categories
+
+def prep_list():
+    prep = [c for c in set([entry["prep"] for entry in metrodb.search(Query().prep.exists())])]
+    prep.sort()
+    return prep
+
+def prep_daybefore_list():
+    prep_daybefore = [c for c in set([entry["prep_daybefore"] for entry in metrodb.search(Query().prep_daybefore.exists())])]
+    prep_daybefore.sort()
+    return prep_daybefore
