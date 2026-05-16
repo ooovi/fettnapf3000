@@ -43,11 +43,15 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
     allergens = []     # all allergens from all ingredients
     total_ingredients = Counter() # all ingredients and weights for the shopping list
     recipe_list = ""   # markdown formatted recipe list ("cookbook")
+    todo_list = [("Vortag","")]     # list of prep steps by menu item
+    todo_index = 0
     
     for category in menu:
     
         menu_list += "\n### " + str(category).capitalize() + "\n\n"
         recipe_list += "\n# " + str(category).capitalize() + "\n\n"
+        todo_list.append((str(category).capitalize() + "\n", ""))
+        todo_index += 1
 
         cat_recipes = []
         for (recipe, n_servings) in menu[category]:
@@ -75,15 +79,30 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
             if n_servings != 0 and recipe.category != "nonfood":
                 cat_recipes.append(recipe_string(recipe, n_servings, True))
 
+           # collect todo list
+            for (amount, ingredient, step) in recipe.prep(n_servings):
+                t = f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()} {step} für {recipe.name.capitalize()}\n"
+                todo_list[todo_index] = (todo_list[todo_index][0], todo_list[todo_index][1] + t)
+
+            for (amount, ingredient, step) in recipe.prep_daybefore(n_servings):
+                t = f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()} {step} für {recipe.name.capitalize()}\n"
+                todo_list[todo_index - 1] = (todo_list[todo_index - 1][0], todo_list[todo_index - 1][1] + t)
+
         recipe_list += ("---").join(cat_recipes)
         # pagebreak after each category
         recipe_list += md_pagebreak
+
 
     # make a total materials list for the overview
     materials_list = "" if materials == set() else "\n## Spezialequipment\n\n" +\
                                                     "\n".join([f"- {item.capitalize()}" for item in materials])
 
-    return menu_list, materials_list, total_weight, total_servings, max_servings, allergens, shopping_list(total_ingredients), recipe_list
+    todos = ""
+    for (cat, todo) in todo_list:
+        if todo != "":
+            todos += "####" + cat + "\n" + todo
+
+    return menu_list, materials_list, total_weight, total_servings, max_servings, allergens, shopping_list(total_ingredients), recipe_list, todos
 
 
 def shopping_list(total_ingredients: Counter):
@@ -129,7 +148,7 @@ def shopping_list(total_ingredients: Counter):
 def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
     
     (menu_list, materials_list, total_weight, total_servings,\
-                    max_servings, allergens, shopping_list, recipe_list) = compile_lists(menu)
+                    max_servings, allergens, shopping_list, recipe_list, todo_list) = compile_lists(menu)
     
     text = "# Menü\n\n"
     text += menu_list
@@ -152,6 +171,10 @@ def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
     text += md_pagebreak
     
     text += recipe_list
+    text += md_pagebreak
+
+    text += "\n# Todo-Liste\n\n"
+    text += todo_list
     
     return text
 

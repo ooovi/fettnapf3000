@@ -32,6 +32,26 @@ class Recipe:
             scaled.append((section, Counter({i : n_servings * (ingredients[i] / self.n_servings) for i in ingredients})))
         return scaled
 
+    def prep(self, n_servings: float) -> (List, List):
+        prep = []
+        for (section, ings) in self.ingredients:
+           for (ing, serv) in ings.items():
+              db_entries = metrodb.search(Query().ingredient == ing)
+              if db_entries:
+                  if db_entries[0]["prep"] != '':
+                    prep.append((n_servings * (serv / self.n_servings), ing, db_entries[0]["prep"]))
+        return prep
+
+    def prep_daybefore(self, n_servings: float) -> (List, List):
+        prep_daybefore = []
+        for (section, ings) in self.ingredients:
+           for (ing, serv) in ings.items():
+              db_entries = metrodb.search(Query().ingredient == ing)
+              if db_entries:
+                  if db_entries[0]["prep_daybefore"] != '':
+                    prep_daybefore.append((n_servings * (serv / self.n_servings), ing, db_entries[0]["prep_daybefore"]))
+        return prep_daybefore
+
     @classmethod
     def from_document(cls, doc):
         if "category" in doc:
