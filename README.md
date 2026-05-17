@@ -44,9 +44,9 @@ Create a menu file containing the number of servings you want to prepare per rec
 Our recipe databases are kept in a [separeate repository](https://github.com/ooovi/fettnapf3000recipes). Clone that and place it next to the directory of this repo. If you want to use your own database, adjust the path in line 19 of `server.py`. 
 
 #### Plan!
-Call the program by entering the following command from within the project directory:
+Call the program by entering the following command from within `src` folder of the project directory:
 ```
-python src/fettnapf3000 example_menu.txt
+python3 fettnapf3000.py ../example_menu.txt ../../fettnapf3000recipes/team_recipes.json
 ```
 It will store a pdf file in the same folder as the menu if you have `pypandoc` installed. Otherwise, you'll get a plain text markdown file.
 
