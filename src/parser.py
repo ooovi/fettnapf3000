@@ -97,34 +97,37 @@ def build_recipe(recipe_string):
 
         return Recipe(name, servings, counters, instr, mat, category)
 
-
 def parse_recipe(path):
     with open(path, 'r') as readfile:
         recipe_string = readfile.read()
         return build_recipe(recipe_string)
 
 ## parse a menu file
-#
 
 category = Group(Suppress("### ") + word("name") + OneOrMore(ingredient + Optional(linebreaks))("recipes"))
-menu_parser = OneOrMore(category)
+day = Group(Suppress("## ") + word("day") + OneOrMore(category)("categories"))
+menu_parser = OneOrMore(day)("days") | Group(OneOrMore(category)("categories"))
 
-# returns a list of tuples (category, recipe filename, number of servings)
-def parse_menu_file(path) -> list[tuple[str, str, float]]:
+# returns a list of tuples (day, (category, recipe filename, number of servings))
+def parse_menu_file(path) -> list[(str,tuple[str, str, float])]:
     with open(path, 'r') as file:
         menu_string = file.read()
         return parse_menu(menu_string)
 
-def parse_menu(menu_string: str) -> list[tuple[str, str, float]]:
+def parse_menu(menu_string: str) -> list[(str,tuple[str, str, float])]:
     try:
         parsed_menu = menu_parser.parseString(menu_string)
     except ParseException as err:
         raise ParseError(f"Menu not formatted correctly{err}")
     menu = []
-    for cat in parsed_menu:
-        cat_name = cat.name[0]
-        for (recipe_name, servings) in cat.recipes:
-            menu.append((cat_name, recipe_name, servings))
+    for day in parsed_menu:
+        for cat in day.categories:
+            cat_name = cat.name[0]
+            for (recipe_name, servings) in cat.recipes:
+                # for bw compat, allow pure ### headings and put them all in one day
+                today = day.day[0] if "days" in parsed_menu else "Heute"
+                menu.append((today, (cat_name, recipe_name, servings)))
+
     return menu
 
 def recipe_db(path):

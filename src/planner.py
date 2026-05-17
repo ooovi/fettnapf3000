@@ -25,15 +25,16 @@ def cat_sort(cat: str):
         return 0
 
 
-# given a dict {sections -> (recipe, n_servings)}, compute:
+# given a dict {days -> {sections -> (recipe, n_servings)}}, compute:
 #   - a menu overview markdown string
 #   - the total weight of all ingredients
 #   - the total number of servings
 #   - the maximal number of servings per dish
 #   - a markdown list of all special materials from all recipes
 #   - a markdown shopping list, sectioned by ingredient category
-#   - a markdown collection of recipes.
-def compile_lists(menu: dict[str, tuple[Recipe, float]]):
+#   - a markdown collection of recipes
+#   - a todo list of prep steps, sorted according to menu order, with day-before prep steps moved
+def compile_lists(menu: dict[str, dict[str, tuple[Recipe, float]]]):
 
     menu_list = ""     # list of recipes and servings for the menu overview page
     total_weight = 0   # total weight of all ingredients
@@ -46,51 +47,57 @@ def compile_lists(menu: dict[str, tuple[Recipe, float]]):
     todo_list = [("Vortag","")]     # list of prep steps by menu item
     todo_index = 0
     
-    for category in menu:
-    
-        menu_list += "\n### " + str(category).capitalize() + "\n\n"
-        recipe_list += "\n# " + str(category).capitalize() + "\n\n"
-        todo_list.append((str(category).capitalize() + "\n", ""))
+    for day in menu:
+        recipe_list += "\n# " + str(day).capitalize() + "\n\n"
+        menu_list += "\n## " + str(day).capitalize() + "\n\n"
+
+        todo_list.append((str(day).capitalize() + "\n", ""))
         todo_index += 1
 
-        cat_recipes = []
-        for (recipe, n_servings) in menu[category]:
+        for category in menu[day]:
+        
+            menu_list += "\n### " + str(category).capitalize() + "\n\n"
+            recipe_list += "\n## " + str(category).capitalize() + "\n\n"
 
-            # collect ingredients for shopping list
-            for (_, ingredients) in recipe.scaled_ingredients(n_servings):
-                total_ingredients += ingredients
+            cat_recipes = []
+            for (recipe, n_servings) in menu[day][category]:
 
-            for allergen in recipe.allergens:
-                allergens.append(allergen) if allergen not in allergens else allergens
+                # collect ingredients for shopping list
+                for (_, ingredients) in recipe.scaled_ingredients(n_servings):
+                    total_ingredients += ingredients
 
-            # collect materials
-            materials |= recipe.materials
+                for allergen in recipe.allergens:
+                    allergens.append(allergen) if allergen not in allergens else allergens
 
-            # update stats
-            total_weight += n_servings * recipe.total_weight
-            if recipe.category != "nonfood":
-                total_servings += n_servings
-                max_servings = max(max_servings, n_servings)
+                # collect materials
+                materials |= recipe.materials
 
-           # collect recipe for menu overview
-            menu_list += f"- {n_servings:g} Portionen {recipe.name.capitalize()}\n"
+                # update stats
+                total_weight += n_servings * recipe.total_weight
+                if recipe.category != "nonfood":
+                    total_servings += n_servings
+                    max_servings = max(max_servings, n_servings)
 
-           # collect recipe string
-            if n_servings != 0 and recipe.category != "nonfood":
-                cat_recipes.append(recipe_string(recipe, n_servings, True))
+            # collect recipe for menu overview
+                menu_list += f"- {n_servings:g} Portionen {recipe.name.capitalize()}\n"
 
-           # collect todo list
-            for (amount, ingredient, step) in recipe.prep(n_servings):
-                t = f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()} {step} für {recipe.name.capitalize()}\n"
-                todo_list[todo_index] = (todo_list[todo_index][0], todo_list[todo_index][1] + t)
+            # collect recipe string
+                if n_servings != 0 and recipe.category != "nonfood":
+                    cat_recipes.append(recipe_string(recipe, n_servings, True))
 
-            for (amount, ingredient, step) in recipe.prep_daybefore(n_servings):
-                t = f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()} {step} für {recipe.name.capitalize()}\n"
-                todo_list[todo_index - 1] = (todo_list[todo_index - 1][0], todo_list[todo_index - 1][1] + t)
+            # collect todo list
+                for (amount, ingredient, step) in recipe.prep(n_servings):
+                    t = f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()} {step} für {recipe.name.capitalize()}\n"
+                    todo_list[todo_index] = (todo_list[todo_index][0], todo_list[todo_index][1] + t)
 
-        recipe_list += ("---").join(cat_recipes)
-        # pagebreak after each category
-        recipe_list += md_pagebreak
+            # day-before prep steps go to previous menu item
+                for (amount, ingredient, step) in recipe.prep_daybefore(n_servings):
+                    t = f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()} {step} für {recipe.name.capitalize()}\n"
+                    todo_list[todo_index - 1] = (todo_list[todo_index - 1][0], todo_list[todo_index - 1][1] + t)
+
+            recipe_list += ("---").join(cat_recipes)
+            # pagebreak after each category
+            recipe_list += md_pagebreak
 
 
     # make a total materials list for the overview
@@ -145,7 +152,7 @@ def shopping_list(total_ingredients: Counter):
     return slist
 
 
-def plan(menu: dict[str, tuple[Recipe, float]]) -> str:
+def plan(menu: dict[str, dict[str, tuple[Recipe, float]]]) -> str:
     
     (menu_list, materials_list, total_weight, total_servings,\
                     max_servings, allergens, shopping_list, recipe_list, todo_list) = compile_lists(menu)
