@@ -1,5 +1,5 @@
-from tinydb import Query
 import markdown
+from tinydb import Query, TinyDB
 import urllib.parse
 import pymdownx
 
@@ -7,6 +7,8 @@ import parser
 import planner
 from recipe import Recipe
 from utils import randomoji, randomoji_control
+
+urldb = TinyDB('requests.json', indent=2)
 
 class FettnapfPage:
     def __init__(self, db, user="team"):
@@ -88,7 +90,7 @@ class FettnapfPage:
             html_str += "".join("<dd>" + recipe + "</dd>" for recipe in recipe_links)
         return html_str + "</dl>"
 
-    def plan_menu(self, menu_md):
+    def plan_menu(self, menu_md, id = ''):
         try:
             menu_list = parser.parse_menu(menu_md)
         except parser.ParseError as e:
@@ -114,15 +116,18 @@ class FettnapfPage:
                 menu[day] = {category : [(recipe, n_servings)]}
 
         plan = planner.plan(menu)
-    
+
         extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
         plan_html = markdown.markdown(plan,
             extensions=['tables','pymdownx.tasklist'],
             extension_configs=extension_configs)
 
-        moji = randomoji_control(self.root + "/menu/?menu=" + urllib.parse.quote(menu_md), "editieren")
+        if id :
+            moji = randomoji_control(self.root + "/menu/?id=" + id, "editieren")
+        else :
+            moji = randomoji_control(self.root + "/menu/?menu=" + urllib.parse.quote(menu_md), "editieren")
 
-        return self.html_body("calculate",
+        plan_html = self.html_body("calculate",
             f"""{moji}
                 {plan_html}
                 <hr>
@@ -131,3 +136,9 @@ class FettnapfPage:
                 Wenn du welche findest, mail an fettnapf3000 ät posteo punkt de</a>!
                 </div>
             """, False)
+        
+        # if requested, store the menu and html in the database  
+        if id:
+            urldb.upsert({'id' : id, 'menu_md' : menu_md, 'html' : plan_html}, Query().id == id)
+
+        return plan_html  
