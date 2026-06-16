@@ -97,10 +97,10 @@ class RecipePage(FettnapfPage):
         # make new plan, store in db
         self.plan_menu(kwargs.get("menu"), id)
         raise cherrypy.HTTPRedirect(
-            f"{self.root}/plan/?id=" + urllib.parse.quote(id)
+            f"{self.root}/calculate_menu/?id=" + urllib.parse.quote(id)
         )
 
     @cherrypy.expose
-    def plan(self, **kwargs):
+    def calculate_menu(self, **kwargs):
         # retrieve plan from database
         return urldb.search(Query().id == kwargs.get("id"))[0].get("html")
