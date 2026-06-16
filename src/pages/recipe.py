@@ -36,7 +36,7 @@ class RecipePage(FettnapfPage):
         # clean empty form entries from url
         clean_request = { (r,n) for (r,n) in kwargs.items() if n }
         raise cherrypy.HTTPRedirect(
-            f"{self.root}/calculate/?" + '&'.join(f"{urllib.parse.quote(r)}={n}" for (r,n) in clean_request)
+            f"{self.root}/calculate?" + '&'.join(f"{urllib.parse.quote(r)}={n}" for (r,n) in clean_request)
         )
 
     @cherrypy.expose
@@ -97,10 +97,15 @@ class RecipePage(FettnapfPage):
         # make new plan, store in db
         self.plan_menu(kwargs.get("menu"), id)
         raise cherrypy.HTTPRedirect(
-            f"{self.root}/calculate_menu/?id=" + urllib.parse.quote(id)
+            f"{self.root}/plan?id=" + urllib.parse.quote(id)
         )
 
+    # for backwards compat
     @cherrypy.expose
     def calculate_menu(self, **kwargs):
+        return self.plan_menu(kwargs.get("menu"))
+
+    @cherrypy.expose
+    def plan(self, **kwargs):
         # retrieve plan from database
         return urldb.search(Query().id == kwargs.get("id"))[0].get("html")

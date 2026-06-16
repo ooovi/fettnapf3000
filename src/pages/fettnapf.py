@@ -82,7 +82,7 @@ class FettnapfPage:
             recipe_links = []
             for recipe in recipes:
                 if edit:
-                    link = f"repertoire/edit_recipe/?name={urllib.parse.quote(recipe)}"
+                    link = f"repertoire/edit_recipe?name={urllib.parse.quote(recipe)}"
                 else:
                     link = f"calculate?{urllib.parse.quote(recipe)}=10"
                 recipe_links.append(f"""<a href="{self.root}/{link}">{recipe.capitalize().replace("_"," ")}</a>""")
@@ -123,12 +123,13 @@ class FettnapfPage:
             extension_configs=extension_configs)
 
         if id :
-            moji = randomoji_control(self.root + "/menu/?id=" + urllib.parse.quote(id), "editieren")
+            moji = randomoji_control(self.root + "/menu?id=" + urllib.parse.quote(id), "editieren")
         else : # one-off plan, not in database. edit page will require id an put it
-            moji = randomoji_control(self.root + "/menu/?menu=" + urllib.parse.quote(menu_md), "editieren")
+            moji = randomoji_control(self.root + "/menu?menu=" + urllib.parse.quote(menu_md), "editieren")
 
         plan_html = self.html_body("calculate",
             f"""{moji}
+                <p style="font-size:2em; text-align:center;"> {id} </p>
                 {plan_html}
                 <hr>
                 <div style="text-align: center;">
