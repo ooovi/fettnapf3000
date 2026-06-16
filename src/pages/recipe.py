@@ -55,14 +55,17 @@ class RecipePage(FettnapfPage):
             id_field = f"""<input type="text" name="id" id="id" value="{id}" required><br><br>"""
             menu = urldb.search(Query().id == id)[0].get("menu_md")
             moji = randomoji_link("")
+            button = f"""<p><input type="submit" value="Kalkulation editieren"></p>"""
         else:
             id_field = f"""<input type="text" name="id" id="id" required><br><br>"""
             if kwargs.get("menu"): # if no id, but a menu was given, we're editing something from the recipe list page
                 menu = kwargs.get("menu")
                 moji = randomoji_link("")
+                button = f"""<p><input type="submit" value="Kalkulation speichern"></p>"""
             else: # if nothing was given, it's the standard page
                 menu = ""
                 moji = randomoji_link(self.root + "/")
+                button = f"""<p><input type="submit" value="Kalkulation"></p>"""
 
         return self.html_body("menu",
             f"""{moji}
@@ -85,7 +88,7 @@ class RecipePage(FettnapfPage):
                  {id_field}
                  <label for="menu">Menü:</label>
                  <textarea name="menu">{menu}</textarea><br>
-                 <p><input type="submit" value="Kalkulation"></p>
+                 {button}
                 </form>
                <h1>Rezepte</h1>
                {self.recipe_list()}
