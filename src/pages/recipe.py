@@ -2,7 +2,7 @@ import cherrypy
 from tinydb import Query
 import urllib.parse
 from pages.fettnapf import FettnapfPage, urldb
-from utils import randomoji_link
+from utils import randomoji, randomoji_link
 
 class RecipePage(FettnapfPage):
 
@@ -50,19 +50,22 @@ class RecipePage(FettnapfPage):
     # the menu planning page
     @cherrypy.expose
     def menu(self, **kwargs):
-
         if kwargs.get("id"): # if id was given, we're editing an existing menu
-            id_field = f"""<input type="text" name="id" id="id" value={id} required><br><br>"""
+            id = kwargs.get("id")
+            id_field = f"""<input type="text" name="id" id="id" value="{id}" required><br><br>"""
             menu = urldb.search(Query().id == id)[0].get("menu_md")
+            moji = randomoji_link("")
         else:
             id_field = f"""<input type="text" name="id" id="id" required><br><br>"""
             if kwargs.get("menu"): # if no id, but a menu was given, we're editing something from the recipe list page
                 menu = kwargs.get("menu")
+                moji = randomoji_link("")
             else: # if nothing was given, it's the standard page
                 menu = ""
+                moji = randomoji_link(self.root + "/")
 
         return self.html_body("menu",
-            f"""{randomoji_link(self.root + "/")}
+            f"""{moji}
                 <strong>Gib ein Menü in diesem Format an:</strong>
                 <div><pre>
 ### Montag
@@ -90,11 +93,11 @@ class RecipePage(FettnapfPage):
 
     @cherrypy.expose
     def request_menu(self, **kwargs):
-        # make new plan, store in db
         id = kwargs.get("id")
+        # make new plan, store in db
         self.plan_menu(kwargs.get("menu"), id)
         raise cherrypy.HTTPRedirect(
-            f"{self.root}/plan/?id=" + id
+            f"{self.root}/plan/?id=" + urllib.parse.quote(id)
         )
 
     @cherrypy.expose

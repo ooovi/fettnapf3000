@@ -123,8 +123,8 @@ class FettnapfPage:
             extension_configs=extension_configs)
 
         if id :
-            moji = randomoji_control(self.root + "/menu/?id=" + id, "editieren")
-        else :
+            moji = randomoji_control(self.root + "/menu/?id=" + urllib.parse.quote(id), "editieren")
+        else : # one-off plan, not in database. edit page will require id an put it
             moji = randomoji_control(self.root + "/menu/?menu=" + urllib.parse.quote(menu_md), "editieren")
 
         plan_html = self.html_body("calculate",
