@@ -55,7 +55,7 @@ class RecipePage(FettnapfPage):
             id_field = f"""<input type="text" name="id" id="id" value="{id}" required><br><br>"""
             menu = urldb.search(Query().id == id)[0].get("menu_md")
             moji = randomoji_link("")
-            button = f"""<p><input type="submit" value="Kalkulation editieren"></p>"""
+            button = f"""<p><input type="submit" value="Änderungen speichern"></p>"""
         else:
             id_field = f"""<input type="text" name="id" id="id" required><br><br>"""
             if kwargs.get("menu"): # if no id, but a menu was given, we're editing something from the recipe list page
@@ -110,5 +110,10 @@ class RecipePage(FettnapfPage):
 
     @cherrypy.expose
     def plan(self, **kwargs):
-        # retrieve plan from database
-        return urldb.search(Query().id == kwargs.get("id"))[0].get("html")
+        id = kwargs.get("id")
+        entry = urldb.search(Query().id == id)
+        if entry:
+            # retrieve plan from database
+            return entry[0].get("html")
+        else:
+            return self.error_page(f"""<strong>Die Kalkulation {id} existiert nicht.</strong>""")
