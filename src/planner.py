@@ -86,14 +86,18 @@ def compile_lists(menu: dict[str, dict[str, tuple[Recipe, float]]]):
                     cat_recipes.append(recipe_string(recipe, n_servings, True))
 
             # collect todo list
-                for (amount, ingredient, step) in recipe.prep(n_servings):
-                    t = f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()} {step} für {recipe.name.capitalize()}\n"
-                    todo_list[todo_index] = (todo_list[todo_index][0], todo_list[todo_index][1] + t)
+                if recipe.prep(n_servings):
+                    today = f"- für {recipe.name.capitalize()}:\n"
+                    for (amount, ingredient, step) in recipe.prep(n_servings):
+                        today = today + f"  - [ ] {round(amount,3):g} kg {ingredient.capitalize()} {step}\n"
+                    todo_list[todo_index] = (todo_list[todo_index][0], todo_list[todo_index][1] + today)
 
             # day-before prep steps go to previous menu item
-                for (amount, ingredient, step) in recipe.prep_daybefore(n_servings):
-                    t = f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()} {step} für {recipe.name.capitalize()}\n"
-                    todo_list[todo_index - 1] = (todo_list[todo_index - 1][0], todo_list[todo_index - 1][1] + t)
+                if recipe.prep_daybefore(n_servings):
+                    yesterday = f"- für {recipe.name.capitalize()} morgen:\n"
+                    for (amount, ingredient, step) in recipe.prep_daybefore(n_servings):
+                        yesterday = yesterday + f"  - [ ] {round(amount,3):g} kg {ingredient.capitalize()} {step}\n"
+                    todo_list[todo_index - 1] = (todo_list[todo_index - 1][0], todo_list[todo_index - 1][1] + yesterday)
 
             recipe_list += ("---").join(cat_recipes)
             # pagebreak after each category
