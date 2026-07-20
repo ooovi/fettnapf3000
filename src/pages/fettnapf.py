@@ -90,7 +90,7 @@ class FettnapfPage:
             html_str += "".join("<dd>" + recipe + "</dd>" for recipe in recipe_links)
         return html_str + "</dl>"
 
-    def plan_menu(self, menu_md, id = ''):
+    def plan_menu(self, menu_md, id = '', readonly = ''):
         try:
             menu_list = parser.parse_menu(menu_md)
         except parser.ParseError as e:
@@ -118,28 +118,33 @@ class FettnapfPage:
         plan = planner.plan(menu)
 
         extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
-        plan_html = markdown.markdown(plan,
+        html = markdown.markdown(plan,
             extensions=['tables','pymdownx.tasklist'],
             extension_configs=extension_configs)
 
-        if id :
+        if urldb.search(Query().id == id) and urldb.search(Query().id == id)[0].get("readonly"): #do not edit readonly menus
+            return self.error_page(f"""<strong>Das Menü {id} ist read-only und darf nicht editiert werden! Wähle einen anderen Namen.</strong><br>""")
+
+        # if requested, store the menu and html in the database
+        if id:
+            urldb.upsert({'id' : id, 'menu_md' : menu_md, 'html' : html, 'readonly' : True if readonly else False}, Query().id == id)
+
+        return self.plan_html(html, id)
+
+    def plan_html(self, html, id = ''):
+        if id:
             moji = randomoji_control(self.root + "/menu?id=" + urllib.parse.quote(id), "editieren")
         else : # one-off plan, not in database. edit page will require id an put it
             moji = randomoji_control(self.root + "/menu?menu=" + urllib.parse.quote(menu_md), "editieren")
 
-        plan_html = self.html_body("calculate",
+        return self.html_body("calculate",
             f"""{moji}
                 <p style="font-size:2em; text-align:center;"> {id} </p>
-                {plan_html}
+                {html}
                 <hr>
                 <div style="text-align: center;">
                 Rezepte können Spuren von Tipp- und Denkfehlern enthalten.
                 Wenn du welche findest, mail an fettnapf3000 ät posteo punkt de</a>!
                 </div>
             """, False)
-        
-        # if requested, store the menu and html in the database  
-        if id:
-            urldb.upsert({'id' : id, 'menu_md' : menu_md, 'html' : plan_html}, Query().id == id)
 
-        return plan_html  

@@ -52,10 +52,17 @@ class RecipePage(FettnapfPage):
     def menu(self, **kwargs):
         if kwargs.get("id"): # if id was given, we're editing an existing menu
             id = kwargs.get("id")
-            id_field = f"""<input type="text" name="id" id="id" value="{id}" required><br><br>"""
+            readonly = urldb.search(Query().id == id)[0].get("readonly")
+            if readonly:
+                id_field = f"""<label for="id">Die Kalkulation ist read-only. Bitte wähle einen neuen Namen:</label><br>
+                    <input type="text" name="id" id="id" placeholder="{id}" required><br><br>"""
+                button = f"""<p><input type="submit" value="Neue Kalkulation speichern"></p>"""
+            else:
+                id_field = f"""<label for="id">Name für die Kalkulation:</label><br>
+                    <input type="text" name="id" id="id" value="{id}" required><br><br>"""
+                button = f"""<p><input type="submit" value="Änderungen speichern"></p>"""
             menu = urldb.search(Query().id == id)[0].get("menu_md")
             moji = randomoji_link("")
-            button = f"""<p><input type="submit" value="Änderungen speichern"></p>"""
         else:
             id_field = f"""<input type="text" name="id" id="id" required><br><br>"""
             if kwargs.get("menu"): # if no id, but a menu was given, we're editing something from the recipe list page
@@ -84,10 +91,11 @@ class RecipePage(FettnapfPage):
                 Die Namen der Gerichte müssen genau der Liste unten entsprechen!<br>
             Drück auf Kalkulation. Speicher danach den Link, um deine Kalkulation zu teilen, oder drucke die Seite aus.<br><br>
                 <form action="{self.root}/request_menu" method="post">
-                 <label for="id">Name für die Kalkulation:</label><br>
                  {id_field}
                  <label for="menu">Menü:</label>
                  <textarea name="menu">{menu}</textarea><br>
+                 <input type="checkbox" id="readonly" name="readonly" unchecked />
+                 <label for="readonly">Als read-only speichern</label>
                  {button}
                 </form>
                <h1>Rezepte</h1>
@@ -97,11 +105,14 @@ class RecipePage(FettnapfPage):
     @cherrypy.expose
     def request_menu(self, **kwargs):
         id = kwargs.get("id")
-        # make new plan, store in db
-        self.plan_menu(kwargs.get("menu"), id)
-        raise cherrypy.HTTPRedirect(
-            f"{self.root}/plan?id=" + urllib.parse.quote(id)
-        )
+        if urldb.search(Query().id == id) and urldb.search(Query().id == id)[0].get("readonly"): #do not edit readonly menus
+            return self.error_page(f"""<strong>Die Kalkulation {id} ist read-only und darf nicht editiert werden! Wähle einen anderen Namen.</strong><br>""")
+        else:
+            # make new plan, store in db
+            self.plan_menu(kwargs.get("menu"), id, kwargs.get("readonly"))
+            raise cherrypy.HTTPRedirect(
+                f"{self.root}/plan?id=" + urllib.parse.quote(id)
+            )
 
     # for backwards compat
     @cherrypy.expose
@@ -114,6 +125,6 @@ class RecipePage(FettnapfPage):
         entry = urldb.search(Query().id == id)
         if entry:
             # retrieve plan from database
-            return entry[0].get("html")
+            return self.plan_html(entry[0].get("html"), id)
         else:
             return self.error_page(f"""<strong>Die Kalkulation {id} existiert nicht.</strong>""")
