@@ -90,23 +90,21 @@ class FettnapfPage:
             html_str += "".join("<dd>" + recipe + "</dd>" for recipe in recipe_links)
         return html_str + "</dl>"
 
-    def plan_menu(self, menu_md, id = '', readonly = ''):
+    def menu_html(self, menu_md):
         try:
             menu_list = parser.parse_menu(menu_md)
         except parser.ParseError as e:
-            return self.error_page(f"""<strong>Dein Menü ist nicht im richtigen Format!</strong><br>
+            raise Exception(self.error_page(f"""<strong>Dein Menü ist nicht im richtigen Format!</strong><br>
                         Geh zurück und schau es dir nochmal an. Der Fehler:<br>
-                        <div>{e}</div>
-                    """)
+                        <div>{e}</div>"""))
         menu = {}
         for (day, (category, recipe_name, n_servings)) in menu_list:
             recipe_entries = self.db.search(Query().name == recipe_name)
             if recipe_entries:
                 recipe = Recipe.from_document(recipe_entries[0])
             else:
-                return self.error_page(f"""<strong>Das Rezept {recipe_name.capitalize().replace("_"," ")} steht nicht in der Liste!</strong><br>
-                    Geh zurück und schau es dir nochmal an.
-                    """)
+                raise Exception(self.error_page(f"""<strong>Das Rezept {recipe_name.capitalize().replace("_"," ")} steht nicht in der Liste!</strong><br>
+                    geh zurück und schau es dir nochmal an."""))
             if day in menu:
                 if category in menu[day]:
                     menu[day][category].append((recipe, n_servings))
@@ -118,29 +116,30 @@ class FettnapfPage:
         plan = planner.plan(menu)
 
         extension_configs = { 'pymdownx.tasklist': {'clickable_checkbox': 'True' } }
-        html = markdown.markdown(plan,
+
+        return markdown.markdown(plan,
             extensions=['tables','pymdownx.tasklist'],
             extension_configs=extension_configs)
 
+    def store_menu(self, menu_md, id, readonly = ''):
         if urldb.search(Query().id == id) and urldb.search(Query().id == id)[0].get("readonly"): #do not edit readonly menus
-            return self.error_page(f"""<strong>Das Menü {id} ist read-only und darf nicht editiert werden! Wähle einen anderen Namen.</strong><br>""")
+            raise Exception(self.error_page(f"""<strong>Die Kalkulation {id} ist read-only und darf nicht editiert werden! Wähle einen anderen Namen.</strong><br>"""))
 
-        # if requested, store the menu and html in the database
-        if id:
-            urldb.upsert({'id' : id, 'menu_md' : menu_md, 'html' : html, 'readonly' : True if readonly else False}, Query().id == id)
+        html = self.menu_html(menu_md)
 
-        return self.plan_html(html, id)
+        # store the menu and html in the database
+        urldb.upsert({'id' : id, 'menu_md' : menu_md, 'html' : html, 'readonly' : True if readonly else False}, Query().id == id)
 
-    def plan_html(self, html, id = ''):
-        if id:
-            moji = randomoji_control(self.root + "/menu?id=" + urllib.parse.quote(id), "editieren")
-        else : # one-off plan, not in database. edit page will require id an put it
-            moji = randomoji_control(self.root + "/menu?menu=" + urllib.parse.quote(menu_md), "editieren")
+    def plan_stored(self, id):
+        entry = urldb.search(Query().id == id)
+        if not entry:
+            return self.error_page(f"""<strong>Die Kalkulation {id} existiert nicht.</strong>""")
 
+        moji = randomoji_control(self.root + "/menu?id=" + urllib.parse.quote(id), "editieren")
         return self.html_body("calculate",
             f"""{moji}
                 <p style="font-size:2em; text-align:center;"> {id} </p>
-                {html}
+                {entry[0].get("html")}
                 <hr>
                 <div style="text-align: center;">
                 Rezepte können Spuren von Tipp- und Denkfehlern enthalten.
@@ -148,3 +147,14 @@ class FettnapfPage:
                 </div>
             """, False)
 
+    def plan_oneoff(self, menu_md):
+        moji = randomoji_control(self.root + "/menu?menu=" + urllib.parse.quote(menu_md), "editieren")
+        return self.html_body("calculate",
+            f"""{moji}
+                {self.menu_html(menu_md)}
+                <hr>
+                <div style="text-align: center;">
+                Rezepte können Spuren von Tipp- und Denkfehlern enthalten.
+                Wenn du welche findest, mail an fettnapf3000 ät posteo punkt de</a>!
+                </div>
+            """, False)

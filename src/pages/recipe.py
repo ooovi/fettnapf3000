@@ -44,7 +44,7 @@ class RecipePage(FettnapfPage):
         if not kwargs:
             raise cherrypy.HTTPRedirect(f"/{self.root}")
 
-        return self.plan_menu("### Rezepte\n" + "\n".join(f"{n} {recipe_name}" for (recipe_name, n) in kwargs.items()))
+        return self.plan_oneoff("### Rezepte\n" + "\n".join(f"{n} {recipe_name}" for (recipe_name, n) in kwargs.items()))
 
 
     # the menu planning page
@@ -105,26 +105,20 @@ class RecipePage(FettnapfPage):
     @cherrypy.expose
     def request_menu(self, **kwargs):
         id = kwargs.get("id")
-        if urldb.search(Query().id == id) and urldb.search(Query().id == id)[0].get("readonly"): #do not edit readonly menus
-            return self.error_page(f"""<strong>Die Kalkulation {id} ist read-only und darf nicht editiert werden! Wähle einen anderen Namen.</strong><br>""")
-        else:
-            # make new plan, store in db
-            self.plan_menu(kwargs.get("menu"), id, kwargs.get("readonly"))
-            raise cherrypy.HTTPRedirect(
-                f"{self.root}/plan?id=" + urllib.parse.quote(id)
-            )
+        # make new plan, store in db
+        try:
+            self.store_menu(kwargs.get("menu"), id, kwargs.get("readonly"))
+        except Exception as e:
+            return e.args[0]
+        raise cherrypy.HTTPRedirect(
+            f"{self.root}/plan?id=" + urllib.parse.quote(id)
+        )
 
     # for backwards compat
     @cherrypy.expose
     def calculate_menu(self, **kwargs):
-        return self.plan_menu(kwargs.get("menu"))
+        return self.plan_oneoff(kwargs.get("menu"))
 
     @cherrypy.expose
     def plan(self, **kwargs):
-        id = kwargs.get("id")
-        entry = urldb.search(Query().id == id)
-        if entry:
-            # retrieve plan from database
-            return self.plan_html(entry[0].get("html"), id)
-        else:
-            return self.error_page(f"""<strong>Die Kalkulation {id} existiert nicht.</strong>""")
+        return self.plan_stored(kwargs.get("id"))
