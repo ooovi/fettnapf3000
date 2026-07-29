@@ -139,7 +139,7 @@ def shopping_list(total_ingredients: Counter):
     def cat_markdown(cat: str):
         md = ""
         cat_amount = 0
-        for (ingredient, amount) in cat_dict[cat]:
+        for (ingredient, amount) in sorted(cat_dict[cat]):
             md += f"- [ ] {round(amount,3):g} kg {ingredient.capitalize()}\n"
             cat_amount += amount
         md = f"\n### {cat.capitalize()} ({round(cat_amount,3):g} kg)\n\n" + md
